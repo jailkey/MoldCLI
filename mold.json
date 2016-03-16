@@ -1,0 +1,36 @@
+{
+	"name": "Mold",
+	"version": "0.2.0",
+	"repositories": {
+		"Mold": "Mold",
+		"App": "tests/App"
+	},
+	"dependencies": [
+		{
+			"name": "Mold.Lib.Event",
+			"path": "../../Mold_Lib_Template/../Mold_Lib_Event/",
+			"version": "0.3.0"
+		},
+		{
+			"name": "Mold.Core.Hexler",
+			"path": "../../hexler/hexler/",
+			"version": "0.2.0"
+		},
+		{
+			"name": "Mold.Lib.Template",
+			"path": "../../Mold_Lib_Template/",
+			"version": "0.4.0"
+		}
+	],
+	"docs": {
+		"md": [],
+		"html": []
+	},
+	"defaultSeeds": [
+		"Mold"
+	],
+	"files": [
+		"Mold.js",
+		".gitignore"
+	]
+}
