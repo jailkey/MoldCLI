@@ -2559,22 +2559,36 @@
 			}
 
 			return new __Mold.Core.Promise(function(resolve, reject){
+				var getWriteStream = function(){
+					var writeStream = fs.createWriteStream(target);
+					writeStream.on("error", reject);
+					writeStream.on("close", function(ready) {
+						filename = target;
+						resolve(filename);
+					});
+
+					return writeStream;
+				}
+
 				if(!_isHttp){
 					var readStream = fs.createReadStream(filename);
 					readStream.on("error", reject);
+					readStream.pipe(getWriteStream());
 				}else{
 					var readStream = request.get(filename)
-					readStream.on('error', reject)
+					readStream.on('error', function(err){
+						reject(err);
+					})
+					readStream.on('response', function(response){
+						if(response.statusCode === 200){
+							readStream.pipe(getWriteStream());
+						}else{
+							reject(new Error("file copy error (" + filename + ") status code: '" + response.statusCode + "'! [Mold.Core.File]"))
+						}
+					})
 				}
 
-				var writeStream = fs.createWriteStream(target);
-				writeStream.on("error", reject);
-				writeStream.on("close", function(ready) {
-					filename = target;
-					resolve(filename);
-				});
-
-				readStream.pipe(writeStream);
+				
 			})
 		}
 		
