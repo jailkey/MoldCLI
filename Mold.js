@@ -1956,6 +1956,23 @@
 			},
 
 			/**
+			 * @method search 
+			 * @description search a property in all config files
+			 * @param  {string} name the property name
+			 * @return {mixed} returns the property value or null if nothing was found
+			 */
+			search : function(name){
+				if(_configValue['local'] && _configValue['local'][name]){
+					return  _configValue['local'][name]
+				}else{
+					if(_configValue['global'] && _configValue['global'][name]){
+						return _configValue['global'][name];
+					}
+				}
+				return null;
+			},
+
+			/**
 			 * @method getAll 
 			 * @description returns the hole configuration file
 			 * @param  {string} [type] - optional the type of configuration possible values are 'local' and 'global' 
@@ -3034,7 +3051,7 @@
 			var mainSeedPromises = []
 			
 			this.ready.then(function(){
-				var mainSeeds = that.Core.Config.get('mainSeeds');
+				var mainSeeds = that.Core.Config.search('mainSeeds');
 				if(mainSeeds && mainSeeds.length){
 					mainSeeds.forEach(function(seedName){
 						mainSeedPromises.push(that.load(seedName));
