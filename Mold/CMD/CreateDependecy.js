@@ -68,6 +68,7 @@ Seed({
 							Command.updateMoldJson({
 								'-property' : 'dependencies',
 								'-value' : currentConf.dependencies,
+								
 							})
 							.then(function(){
 								args.parameter.dependencies = currentConf.dependencies

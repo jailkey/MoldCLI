@@ -10,7 +10,7 @@
 	"dependencies": [
 		{
 			"name": "Mold",
-			"path": "http://localhost/Mold%20Git%20Checkout/MoldJS/",
+			"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master",
 			"version": "0.2.3"
 		}
 	]

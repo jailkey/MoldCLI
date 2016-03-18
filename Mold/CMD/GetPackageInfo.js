@@ -96,6 +96,9 @@ Seed({
 										})
 									}else{
 										//if it is a file get the data and add it
+										if(currentPath !== '' && !currentPath.endsWith('/')){
+											currentPath += '/';
+										}
 										var filePath = currentPath + source;
 										collected.linkedSources.push({
 											path : source,

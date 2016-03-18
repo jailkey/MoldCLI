@@ -46,7 +46,6 @@ Seed({
 
 							moldJson.dependencies.forEach(function(dep){
 								infoPromises.push(new Promise(function(resolveDep, rejectDep){
-									//console.log("dependencies", dep)
 									//get all infos
 									Command.getPackageInfo({ '-p' : dep.path }).then(function(info){
 										packageInfo = info.packageInfo;
