@@ -1,11 +1,11 @@
 {
   "name": "mold-js",
-  "description": "MoldJS structure and pattern framework",
-  "version": "0.2.6",
+  "description": "MoldJS structure and pattern framework commandline interface",
+  "version": "0.2.7",
   "author": "Jan Kaufmann",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jailkey/MoldJS"
+    "url": "https://github.com/jailkey/MoldCLI"
   },
   "bin": {
     "mold": "bin/mold"
@@ -19,7 +19,8 @@
     "framework",
     "mvc",
     "mold",
-    "moldjs"
+    "moldjs",
+    "cli"
   ],
   "preferGlobal": true,
   "scripts": {

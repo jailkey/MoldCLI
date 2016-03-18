@@ -139,6 +139,9 @@ Seed({
 							var path = parameter[param].value;
 
 							if(parameter[param].extendpath && !path.endsWith(parameter[param].extendpath)){
+								if(!path.endsWith("/") && path !== ""){
+									path += "/";
+								}
 								path += parameter[param].extendpath;
 							}
 
@@ -171,6 +174,11 @@ Seed({
 										}
 									}
 								}())
+
+							loader.catch(function(err){
+								console.log("ERR", err)
+								reject(new Mold.Errors.CommandError(err, cmd.name))
+							})
 						}
 					}
 					if(files.length){

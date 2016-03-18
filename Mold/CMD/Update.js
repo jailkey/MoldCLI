@@ -23,12 +23,15 @@ Seed({
 				},
 				'-d' : {
 					'alias' : '-dependency'
+				},
+				'--force' : {
+					'description' : 'force an update, even if the version is ok.'
 				}
 			},
 			code : function(args){
 
 				return new Promise(function(resolve, reject){
-		
+					var force = args.parameter['--force'];
 					Command.getMoldJson({ '-p' : '' }).then(function(moldJson){
 						moldJson =  moldJson.parameter.source[0].data;
 						if(!moldJson){
@@ -39,6 +42,7 @@ Seed({
 							var infoPromises = [];
 							var infos = [];
 							var updateDep = {};
+							var updateSteps = [];
 
 							moldJson.dependencies.forEach(function(dep){
 								infoPromises.push(new Promise(function(resolveDep, rejectDep){
@@ -47,7 +51,7 @@ Seed({
 									Command.getPackageInfo({ '-p' : dep.path }).then(function(info){
 										packageInfo = info.packageInfo;
 										var result = Version.compare(packageInfo.currentPackage.version, dep.version);
-										if(result === "bigger"){
+										if(result === "bigger" || force){
 											infos.push(packageInfo);
 											updateDep[dep.name] = packageInfo.currentPackage.version;
 										}else if(result === "equal"){
@@ -63,11 +67,14 @@ Seed({
 								}));
 							})
 
-							var depPromise = new Promise().all(infoPromises);
+							updateSteps.push(function(){
+								return Promise.all(infoPromises)
+							});
 
-							depPromise.then(function(){
+							var mergedDeps = {};
+							updateSteps.push(function(){
 								//merge all dependencies
-								var mergedDeps = {};
+								
 								infos.forEach(function(dep){
 									mergedDeps = Mold.merge(mergedDeps, dep);
 								});
@@ -78,55 +85,88 @@ Seed({
 									repos.push(Command.createRepo({ '-name' : repoName }));
 								}
 
-								new Promise().all(repos).then(function(){
-									var seeds = [];
-									//overwrite all seeds
-									for(var seedName in mergedDeps.linkedSeeds){
-										var seedPath =  mergedDeps.linkedSeeds[seedName].path;
-										if(seedPath){
-											seeds.push(Command.copySeed({ '-name' : seedName, '-path' : seedPath, '--o' : true }));
+								return Promise.all(repos)
+							});
+
+							updateSteps.push(function(){
+								
+								var seeds = [];
+								//overwrite all seeds
+								for(var seedName in mergedDeps.linkedSeeds){
+									var seedPath =  mergedDeps.linkedSeeds[seedName].path;
+									if(seedPath){
+										seeds.push(Command.copySeed({ '-name' : seedName, '-path' : seedPath, '--o' : true }));
+									}
+								}
+
+								//create repositorys if needed
+								return Promise.all(seeds);
+							});
+
+
+							//copy linkedSources
+							updateSteps.push(function(){
+								var sourcePromises = [];
+								infos.forEach(function(info){
+									if(info.linkedSources && info.linkedSources.length){
+										info.linkedSources.forEach(function(source){
+											if(source.type === 'file'){
+												sourcePromises.push(Command.copySource({ '-source' : source.filePath, '-target' : source.path}))
+											}else{
+												Command.createPath({ '-path' : source.path})
+											}
+										})
+									}
+								})
+
+								return new Promise(function(resolveSources, rejectSoures){
+									if(!sourcePromises.length){
+										resolveSources()
+										return;
+									}else{
+										Promise.all(sourcePromises).then(resolveSources).catch(rejectSoures);
+									}
+								})
+							})
+									
+							updateSteps.push(function(){
+								return new Promise(function(resolveJsonUpdate, rejectJsonUpdate){
+									var updateMoldJson = false;
+									//if everything is copied, change package versions
+									for(var i = 0; i < moldJson.dependencies.length; i++){
+										var depName = moldJson.dependencies[i].name;
+										if(updateDep[depName]){
+
+											 moldJson.dependencies[i].version = updateDep[depName]; 
+											 args.updatedDependencies =  args.updatedDependencies || [];
+											 args.updatedDependencies =  moldJson.dependencies[i];
+											 updateMoldJson = true;
 										}
 									}
-
-									//create repositorys if needed
-									var copyPromise = new Promise().all(seeds);
-									copyPromise
-										.then(function(){
-											var updateMoldJson = false;
-											//if everything is copied, change package versions
-											for(var i = 0; i < moldJson.dependencies.length; i++){
-												var depName = moldJson.dependencies[i].name;
-												if(updateDep[depName]){
-
-													 moldJson.dependencies[i].version = updateDep[depName]; 
-													 args.updatedDependencies =  args.updatedDependencies || [];
-													 args.updatedDependencies =  moldJson.dependencies[i];
-													 updateMoldJson = true;
-												}
-											}
-											if(updateMoldJson){
-												Command.updateMoldJson({
-													'-property' : 'dependencies',
-													'-value' : moldJson.dependencies,
-												})
-												.then(function(){
-													for(var name in updateDep){
-														Helper.ok(name + " updated to version " + updateDep[name] + "!").lb();
-													}
-
-													resolve(args);
-												})
-												.catch(reject)
-											}else{
-												resolve(args);
-											}
-											
+									if(updateMoldJson){
+										Command.updateMoldJson({
+											'-property' : 'dependencies',
+											'-value' : moldJson.dependencies,
 										})
-										.catch(reject);
-								})
-								.catch(reject);
+										.then(function(){
+											for(var name in updateDep){
+												Helper.ok(name + " updated to version " + updateDep[name] + "!").lb();
+											}
+
+											resolveJsonUpdate(args);
+										})
+										.catch(rejectJsonUpdate)
+									}else{
+										resolveJsonUpdate(args);
+									}
+								});
 							})
-							.catch(reject);
+							
+
+							Promise
+								.waterfall(updateSteps)
+								.then(resolve)
+								.catch(reject)
 
 						}else{
 							Helper.info("No dependencies found!").lb();

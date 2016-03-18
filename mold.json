@@ -2,11 +2,16 @@
 	"name": "Mold.Core.CLI",
 	"version": "0.2.0",
 	"repositories": {
-		"Mold": "Mold",
+		"Mold": "Mold"
 	},
-	"dependencies": [],
-	"files": [
-		"Mold.js",
-		".gitignore"
+	"mainSeeds": [
+		"Mold.Core.CLI"
+	],
+	"dependencies": [
+		{
+			"name": "Mold",
+			"path": "http://localhost/Mold%20Git%20Checkout/MoldJS/",
+			"version": "0.2.3"
+		}
 	]
 }

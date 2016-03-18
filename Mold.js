@@ -1,5 +1,5 @@
 "use strict";
-
+//irgendasein test
 (function(global){
 
 /** ERROR TYPES */
@@ -55,7 +55,6 @@
 	if(_isNodeJS){
 		var fs = require('fs');
 		var vm = require('vm');
-		var mmm = require('mmmagic');
 		var request = require('request');
 		var url = require('url');
 	}
@@ -1810,6 +1809,15 @@
 				return false;
 			},
 
+			camelToHypen : function(camel){
+				var camel = camel.replace(/\./g, '-');
+				var output = "";
+				for(var i = 0; i < camel.length; i++){
+					output += camel[i].toLowerCase();
+				}
+				return output;
+			},
+
 			/**
 			 * @method getMoldPath 
 			 * @description returns the current Mols.js path
@@ -1898,7 +1906,7 @@
 		var _configValue = {
 			local : {
 				'config-path' : __Mold.Core.Pathes.getCurrentPath(),
-				'config-name' : 'mold.json'
+				'config-name' : 'mold.json',
 			},
 			global : {
 				'config-path' : __Mold.Core.Pathes.getMoldPath(),
@@ -1988,7 +1996,7 @@
 							resolve(data)
 						})
 						.catch(function(err){
-							reject(new Error("Error in configfile [" + path + "] " + err.stack))
+							reject(new Error("Error in config file [" + path + "] "))
 						})
 				})
 				
@@ -2547,12 +2555,17 @@
 		 */
 		this.copy = function(target){
 			if(!_isNodeJS){
-				throw new Error("The 'save' method is only available on nodejs [Mold.Core.File]")
+				throw new Error("The 'copx' method is only available on nodejs [Mold.Core.File]")
 			}
 
 			return new __Mold.Core.Promise(function(resolve, reject){
-				var readStream = fs.createReadStream(filename);
-				readStream.on("error", reject);
+				if(!_isHttp){
+					var readStream = fs.createReadStream(filename);
+					readStream.on("error", reject);
+				}else{
+					var readStream = request.get(filename)
+					readStream.on('error', reject)
+				}
 
 				var writeStream = fs.createWriteStream(target);
 				writeStream.on("error", reject);
@@ -2798,7 +2811,6 @@
 					}
 				}
 
-
 				
 				if(!repoPath && confType === "global"){
 					throw new Error("No path for repository found! [" + name + "] " + __Mold.getInstanceDescription())
@@ -2814,6 +2826,10 @@
 
 				for(var i = 0; i < repoPartLength; i++){
 					parts.shift();
+				}
+
+				if(parts[parts.length -1] === "*"){
+					parts[parts.length -1] = "__";
 				}
 
 				path += parts.join('/') + '.js';
@@ -3000,19 +3016,17 @@
 				})
 			)
 
-			//load core seeds
-			var coreSeeds = []
+			//load main seeds
+			var mainSeedPromises = []
 			
 			this.ready.then(function(){
-				if(that.Core.Initializer.isCLI()){
-					coreSeeds.push(that.load("Mold.Core.CLI"));
+				var mainSeeds = that.Core.Config.get('mainSeeds');
+				if(mainSeeds && mainSeeds.length){
+					mainSeeds.forEach(function(seedName){
+						mainSeedPromises.push(that.load(seedName));
+					})
 				}
-				//coreSeeds.push(that.load("Mold.Core.Hexler"))
 			});
-			
-
-
-			//load main seed
 		
 	}
 

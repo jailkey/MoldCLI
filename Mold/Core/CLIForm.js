@@ -2,7 +2,6 @@
 Seed({
 		type : "class",
 		include : [
-			{ Validation : "Mold.Core.Validation" },
 			{ Promise : "Mold.Core.Promise" }
 		]
 	},

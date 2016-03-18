@@ -88,6 +88,7 @@ Seed({
 							if(response.parameter.source[0].data.sources){
 								response.parameter.source[0].data.sources.forEach(function(source){
 									//if it is a directory add only the path
+									
 									if(source.endsWith('/')){
 										collected.linkedSources.push({
 											path : source,
@@ -96,14 +97,11 @@ Seed({
 									}else{
 										//if it is a file get the data and add it
 										var filePath = currentPath + source;
-										if(Mold.Core.Pathes.exists(filePath, 'file')){
-											collected.linkedSources.push({
-												path : source,
-												filePath : filePath,
-												type : 'file'
-											})
-											
-										}
+										collected.linkedSources.push({
+											path : source,
+											filePath : filePath,
+											type : 'file'
+										})
 									}
 								})
 							}
