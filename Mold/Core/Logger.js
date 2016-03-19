@@ -143,6 +143,8 @@ Seed({
 				_showFilePart(info.filePath, info.lineNumber, info.charNumber)
 					.then(traceStack)
 					.catch(traceStack)
+			}else{
+				traceStack();
 			}
 		}
 

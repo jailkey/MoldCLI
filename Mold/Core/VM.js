@@ -35,7 +35,7 @@ Seed({
 
 			this.vm = require('vm');
 			this.fs = require('fs');
-			this.context = new this.vm.createContext(this.sandbox);
+			this.context = new this.vm.createContext(Mold.Core.Config.search('config-path') + this.sandbox);
 
 			//load core
 			var data = this.fs.readFileSync(this.moldPath);
