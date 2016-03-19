@@ -35,10 +35,11 @@ Seed({
 
 			this.vm = require('vm');
 			this.fs = require('fs');
-			this.context = new this.vm.createContext(Mold.Core.Config.search('config-path') + this.sandbox);
+			this.context = new this.vm.createContext(this.sandbox);
 
 			//load core
-			var data = this.fs.readFileSync(this.moldPath);
+			var moldJsPath = (Mold.Core.Config.search('config-path')) ? Mold.Core.Config.search('config-path') + this.moldPath :  this.moldPath;
+			var data = this.fs.readFileSync(moldJsPath);
 			var moldScript = new this.vm.Script(data);
   			moldScript.runInContext(this.context, { filename : "Mold.Core.VM" });
   			this.Mold = this.sandbox.global.Mold;

@@ -7,6 +7,7 @@ Seed({
 			{ Promise : 'Mold.Core.Promise' },
 			{ Helper : 'Mold.Core.CLIHelper' },
 			{ Version : 'Mold.Core.Version' },
+			{ Logger : 'Mold.Core.Logger' },
 			'Mold.CMD.GetMoldJson',
 			'Mold.CMD.CopySeed',
 			'Mold.CMD.GetPackageInfo'

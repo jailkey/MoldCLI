@@ -223,7 +223,13 @@
 			return target;
 		},
 
-
+		/**
+		 * @method diff 
+		 * @description compares two objects and returns a new one that only has the datat from target which not apears in source
+		 * @param  {object} target - the target object
+		 * @param  {object} source - the source object
+		 * @return {object} returns a new diff object
+		 */
 		diff : function(target, source){
 			var output = null;
 			if(Array.isArray(target)){
@@ -2071,6 +2077,11 @@
 				var that = this;
 				var configPath = __Mold.Core.Initializer.getParam('config-path') || this.get('config-path', _defaultType);
 				var configName = __Mold.Core.Initializer.getParam('config-name') || this.get('config-name', _defaultType);
+
+				if(configPath !== "" && !configPath.endsWith("/")){
+					configPath += "/";
+				}
+
 				this.set('config-path', configPath);
 				this.set('config-name', configName)
 
@@ -2870,6 +2881,10 @@
 				var conf = that.Core.Config.get("repositories", confType);
 				var packagePath = that.Core.Config.get('config-path', confType);
 				var rootPath = __Mold.Core.Initializer.getParam('root-path') || '';
+
+				if(!packagePath.endsWith("/") && packagePath !== ""){
+					packagePath += "/";
+				}
 
 				if(!conf && confType === "global"){
 					throw new Error("No repositiories in " + confType + " config found! [" + name + "] " + __Mold.getInstanceDescription())
