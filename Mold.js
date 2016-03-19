@@ -223,6 +223,49 @@
 			return target;
 		},
 
+
+		diff : function(target, source){
+			var output = null;
+			if(Array.isArray(target)){
+				for(var i = 0; i < target.length; i++){
+					var skip = false;
+					for(var x = 0; x < source.length; x++){
+						if(typeof source[x] === "object"){
+							var result = this.diff(target[i], source[x]);
+							if(!result){
+								skip = true;
+								break;
+							}
+						}else{
+							if(target[i] === source[x]){
+								skip = true;
+								break;
+							}
+						}
+					}
+					if(!skip){
+						output = output || [];
+						output.push(target[i]);
+					}
+					
+				}
+			}else if(typeof target === "object"){
+				for(var targetProp in target){
+					if(!source[targetProp]){
+						output = output || {};
+						output[targetProp] = target[targetProp]
+					}else if(typeof source[targetProp] === "object"){
+						var result = this.diff(target[targetProp], source[targetProp]);
+						if(result){
+							output = output || {};
+							output[targetProp] = result;
+						}
+					}
+				}
+			}
+			return output;
+		},
+
 		/**
 		 * @method clone 
 		 * @description clones an given object
