@@ -2521,11 +2521,9 @@
 								if(err){
 									reject(err)
 								}
-
-								if(data){
-									_content = _convertData(data);
-									resolve(_content);
-								}
+								
+								_content = _convertData(data);
+								resolve(_content);
 								
 							})
 							

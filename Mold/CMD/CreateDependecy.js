@@ -40,7 +40,7 @@ Seed({
 				},
 			},
 			code : function(args){
-				Helper = Helper.getInstance(args.conf)
+				Helper = Helper.getInstance(args.conf);
 
 				return new Promise(function(resolve, reject){
 					
@@ -68,7 +68,7 @@ Seed({
 							Command.updateMoldJson({
 								'-property' : 'dependencies',
 								'-value' : currentConf.dependencies,
-								
+								'--silent' : true
 							})
 							.then(function(){
 								args.parameter.dependencies = currentConf.dependencies

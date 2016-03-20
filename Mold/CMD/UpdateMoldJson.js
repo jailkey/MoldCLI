@@ -31,7 +31,7 @@ Seed({
 				}
 			},
 			code : function(args){
-
+				Helper = Helper.getInstance(args.conf);
 				return new Promise(function(resolve, reject){
 					
 

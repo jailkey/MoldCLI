@@ -1,2 +1,8 @@
 /node_modules/
 .DS_Store
+
+/Mold/Core/Validation.js
+/Mold/Core/Version.js
+/Mold/Core/NPM.js
+/Mold/Core/VM.js
+/Mold/Core/__.js
