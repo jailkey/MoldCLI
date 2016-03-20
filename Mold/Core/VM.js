@@ -30,7 +30,9 @@ Seed({
 			this.confName = conf.configName || 'mold.json'
 
 			this.sandbox.process.argv = [
-				'config-path',  this.confPath, 'config-name', this.confName
+				'config-path',  this.confPath,
+				'config-name', this.confName,
+				'use-one-config', true
 			];
 
 			this.vm = require('vm');

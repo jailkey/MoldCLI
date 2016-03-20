@@ -2077,6 +2077,7 @@
 				var that = this;
 				var configPath = __Mold.Core.Initializer.getParam('config-path') || this.get('config-path', _defaultType);
 				var configName = __Mold.Core.Initializer.getParam('config-name') || this.get('config-name', _defaultType);
+				var onlyOneConfig = __Mold.Core.Initializer.getParam('use-one-config') || false;
 
 				if(configPath !== "" && !configPath.endsWith("/")){
 					configPath += "/";
@@ -2089,7 +2090,7 @@
 				var promise = this.loadConfig(localPath);
 				
 				//use two config files (if exists) only on node
-				if(_isNodeJS){
+				if(_isNodeJS && !onlyOneConfig){
 					//if a global file exists load also the global once
 					var globalConfigPath = this.get('config-path', 'global');
 					var globalConfigName = this.get('config-name', 'global');
@@ -2169,7 +2170,7 @@
 	}()
 
 	Mold.prototype.Core.Initializer = function(){
-		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path', 'root-path'];
+		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path', 'root-path', 'use-one-config'];
 		var _availableParams = {};
 		var _cliCommands= [];
 
