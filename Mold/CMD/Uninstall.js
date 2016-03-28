@@ -61,6 +61,8 @@ Seed({
 									}else if(path && dependencies[i].path === path){
 										selected = dependencies[i];
 										break;
+									}else{
+										others.push(dependencies[i]);
 									}
 								}
 
@@ -68,17 +70,78 @@ Seed({
 									reject(new Mold.Errors.CommandError("Package not found!", "uninstall"));
 									return;
 								}
+								
 								var diffSteps = [];
 								var sourceDiff = [];
-								diffSteps.push(function(){
+								var packageInfoDiff = {};
 
-									return PackageInfo.get(name).then(function(packageInfo){
-										Logger.log("current pack", packageInfo.source)
-										PackageInfo.get().then(function(allPackage){
-											allPac
-										})
+								//get current
+								diffSteps.push(function(){
+									
+									return PackageInfo.get(name, true).then(function(packageInfo){
+										packageInfoDiff = packageInfo;
 									});
 								});
+
+								//compare with other packages and get the differenz
+								diffSteps.push(function(){
+									var compareSteps = [];
+									dependencies.forEach(function(currentDep){
+										if(currentDep.name === selected.name){
+											return false;
+										}
+										compareSteps.push(function(){
+											var currentName = currentDep.name;
+
+											return function(){
+
+												return PackageInfo
+														.get(currentName)
+														.then(function(selectedPackage){
+
+															//compare sources
+															packageInfoDiff.sources = packageInfoDiff.sources.filter(function(selected){
+																if(selectedPackage && selectedPackage.sources){
+																	for(var i = 0; i < selectedPackage.sources.length; i++){
+																		if(selected.path === selectedPackage.sources[i].path){
+																			return false;
+																		}
+																	}
+																}
+																return true;
+															})
+
+															//compare dependencies
+															packageInfoDiff.dependencies = packageInfoDiff.dependencies.filter(function(selected){
+																if(selectedPackage && selectedPackage.dependencies){
+																	for(var i = 0; i < selectedPackage.dependencies.length; i++){
+																		if(selected.name === selectedPackage.dependencies[i].name){
+																			return false;
+																		}
+																	}
+																}
+																if(selected.name === currentName){
+																	return false;
+																}
+																return true;
+															})
+														});
+											}
+										}())
+									})
+									return Promise.waterfall(compareSteps);
+								});
+								
+								//delete sources 
+								diffSteps.push(function(){
+									Logger.log("packageInfoDiff", packageInfoDiff)
+									var remover = [];
+									packageInfoDiff.sources.forEach(function(source){
+										var file = new Mold.Core.File(source.path);
+										remover.push(file.remove())
+									})
+									return Promise.all(remover);
+								})
 
 								try {
 									Promise

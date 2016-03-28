@@ -15,7 +15,7 @@
 		},
 		{
 			"name": "Test",
-			"path": "http://localhost/Test",
+			"path": "http://localhost/TEST",
 			"version": "0.0.1"
 		}
 	]

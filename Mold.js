@@ -208,11 +208,14 @@
 					}
 
 					if(target[prop]){
-
-						if(this.isObject(target[prop]) || Array.isArray(target[prop])){
-							target[prop] = this.merge(target[prop], origin[prop], conf);
+						if(conf && conf.merger &&  conf.merger[prop]){
+							target[prop] = conf.merger[prop](target[prop], origin[prop], conf);
 						}else{
-							target[prop] = origin[prop];
+							if(this.isObject(target[prop]) || Array.isArray(target[prop])){
+								target[prop] = this.merge(target[prop], origin[prop], conf);
+							}else{
+								target[prop] = origin[prop];
+							}
 						}
 					}else{
 						target[prop] = origin[prop];
@@ -2636,13 +2639,27 @@
 				throw new Error("The 'save' method is only available on nodejs [Mold.Core.File]")
 			}
 			return new __Mold.Core.Promise(function(resolve, reject){
-
 				fs.writeFile(filename, _convertData(_content, "output"), function(err) {
 					if(err) {
 						return reject(err);
 					}
 					resolve(_content);
 				}); 
+			});
+		}
+
+		this.remove = function(){
+			if(!_isNodeJS){
+				throw new Error("The 'remove' method is only available on nodejs [Mold.Core.File]")
+			}
+			return new __Mold.Core.Promise(function(resolve, reject){
+				fs.unlink(filename, function(err){
+					if(err) {
+						return reject(err);
+					}
+					_content = null;
+					resolve(true);
+				})
 			});
 		}
 

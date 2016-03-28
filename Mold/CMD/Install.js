@@ -72,7 +72,7 @@ Seed({
 								repos.push(Command.createRepo({ '-name' : repoName, '--silent' : true }));
 							}
 
-							//add dependecies
+							//add dependencies
 							installSteps.push(function(){
 								var packageDependencies = [];
 								response.packageInfo.linkedPackages.forEach(function(currentPackage){
@@ -81,17 +81,17 @@ Seed({
 										_packageDep[currentPackage.name] = _packageDep[currentPackage.name] || [];
 										_packageDep[currentPackage.name] = _packageDep[currentPackage.name].concat(currentPackage.dependencies);
 									}
-									packageDependencies.push(function(){
-										return Command.createDependency({ 
-											'-name' : currentPackage.name,
-											'-path' : currentPackage.path,
-											'-version' : currentPackage.version,
-											'--silent' : true
-										})
-									})
 								});
 
-								return Promise.waterfall(packageDependencies);
+								//return Promise.waterfall(packageDependencies);
+								//add only the curent dependency
+								return Command.createDependency({ 
+									'-name' : response.packageInfo.currentPackage.name,
+									'-path' : response.packageInfo.currentPackage.path,
+									'-version' : response.packageInfo.currentPackage.version,
+									'--silent' : true
+								})
+								
 							})
 
 							//install other sources

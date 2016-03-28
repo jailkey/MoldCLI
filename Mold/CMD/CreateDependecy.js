@@ -37,7 +37,7 @@ Seed({
 				},
 				'-p' : {
 					'alias' : '-path'
-				},
+				}
 			},
 			code : function(args){
 				Helper = Helper.getInstance(args.conf);

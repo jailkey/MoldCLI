@@ -1,0 +1,96 @@
+{
+	"packages": {
+		"Mold": {
+			"sources": [
+				{
+					"path": "Mold.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/VM.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/__.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Validation.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Version.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/NPM.js",
+					"type": "file"
+				}
+			],
+			"dependencies": []
+		},
+		"Test2": {
+			"sources": [
+				{
+					"path": "Mold/Lib/Test2.js",
+					"type": "file"
+				}
+			],
+			"dependencies": [
+				{
+					"name": "Mold",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
+					"version": "0.2.3"
+				},
+				{
+					"name": "Test3",
+					"path": "http://localhost/Test3",
+					"version": "0.0.1"
+				}
+			]
+		},
+		"Test": {
+			"sources": [
+				{
+					"path": "Mold/Lib/Test.js",
+					"type": "file"
+				}
+			],
+			"dependencies": [
+				{
+					"name": "Mold",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
+					"version": "0.2.3"
+				},
+				{
+					"name": "Test2",
+					"path": "http://localhost/Test2",
+					"version": "0.0.1"
+				}
+			]
+		},
+		"Test3": {
+			"sources": [
+				{
+					"path": "Mold/Lib/Test3.js",
+					"type": "file"
+				}
+			],
+			"dependencies": [
+				{
+					"name": "Mold",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
+					"version": "0.2.3"
+				}
+			]
+		}
+	}
+}
