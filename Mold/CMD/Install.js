@@ -13,6 +13,7 @@ Seed({
 			{ Helper : 'Mold.Core.CLIHelper' },
 			{ NPM : 'Mold.Core.NPM' },
 			{ File : 'Mold.Core.File' },
+			{ PackageInfo : 'Mold.Core.PackageInfo' },
 			'Mold.CMD.GetMoldJson',
 			'Mold.CMD.CopySeed'
 		]
@@ -49,6 +50,16 @@ Seed({
 			code : function(args){
 				return new Promise(function(resolve, reject){
 					var loader = Helper.loadingBar("get package info ");
+					var _packageSources = {};
+					var _packageDep = {};
+					var _collectSource = function(name, source, type){
+						_packageSources[name] = _packageSources[name] || [];
+						_packageSources[name].push({
+							path : source,
+							type : type
+						})
+					}
+
 					Command.getPackageInfo({ '-p' : args.parameter['-path']})
 						.then(function(response){
 							var repoPromis = new Promise();
@@ -66,6 +77,10 @@ Seed({
 								var packageDependencies = [];
 								response.packageInfo.linkedPackages.forEach(function(currentPackage){
 									loader.text("add dependency " + currentPackage.name)
+									if(currentPackage.dependencies){
+										_packageDep[currentPackage.name] = _packageDep[currentPackage.name] || [];
+										_packageDep[currentPackage.name] = _packageDep[currentPackage.name].concat(currentPackage.dependencies);
+									}
 									packageDependencies.push(function(){
 										return Command.createDependency({ 
 											'-name' : currentPackage.name,
@@ -86,10 +101,13 @@ Seed({
 									response.packageInfo.linkedSources.forEach(function(source){
 										loader.text("add source " + source.path)
 										if(source.type === 'dir'){
+											_collectSource(source.packageName, source.path, 'dir');
+										
 											//create directory
 											sourcePromises.push(Command.createPath({ '-path' : source.path, '--silent' : true }))
 										}else if(source.type === 'file'){
 											var file = new File(source.filePath);
+											_collectSource(source.packageName, source.path, 'file')
 											sourcePromises.push(file.copy(source.path))
 										}
 											
@@ -136,17 +154,19 @@ Seed({
 										var seedPath = response.packageInfo.linkedSeeds[seedName].path;
 										if(seedPath){
 											//copy seeds
-											seeds.push(
-												Command.copySeed({ 
+											seeds.push(function(){
+												var packageName = response.packageInfo.linkedSeeds[seedName].packageName;
+												return Command.copySeed({ 
 													'-name' : seedName,
 													'-path' : seedPath,
 													'--silent' : true
 												})
 												.then(function(seedArgs){
 													loader.text("copy seed " + seedArgs.parameter['-name'].value);
+													_collectSource(packageName, seedArgs.parameter['-target'], 'file');
 												})
 												.catch(rejectCopy)
-											);
+											}());
 											//add to git ignore
 											gitIgnor.push(function(){
 												var name = seedName;
@@ -180,6 +200,27 @@ Seed({
 								});
 
 							});
+							
+							//create mold installation dir
+							installSteps.push(function(){
+								return Command.createPath({ '-path' : '.mold', '--dir' : true ,'--silent' : true })
+							});
+
+							//add source to temp info files
+							installSteps.push(function(){
+								var setInfos = [];
+								for(var packageName in _packageSources){
+									setInfos.push(function(){
+										var pckName = packageName;
+										var pSource =  _packageSources[packageName];
+										return function() { return PackageInfo.set(pckName, { 
+											sources : pSource,
+											dependencies : _packageDep[pckName] || []
+										}) }
+									}());
+								}
+								return Promise.waterfall(setInfos)
+							})
 
 							
 							//execute all steps

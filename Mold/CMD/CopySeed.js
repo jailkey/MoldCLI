@@ -53,7 +53,7 @@ Seed({
 
 					var content = args.parameter.source[0];
 					var conf = { '-p' : Mold.Core.Pathes.getPathFromName(name, true), '-c' : content};
-					
+					args.parameter['-target'] = Mold.Core.Pathes.getPathFromName(name, true);
 					if(overwrite){
 						conf['--of'] = true;
 					}

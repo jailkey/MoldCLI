@@ -1,20 +1,15 @@
 //!info transpiled
-/**
- * @todo install npm packages
- * @todo install extra files an directories
- */
 Seed({
 		type : "action",
 		platform : 'node',
 		include : [
 			{ Command : 'Mold.Core.Command' },
 			{ Promise : 'Mold.Core.Promise' },
-			{ VM : 'Mold.Core.VM' },
 			{ Helper : 'Mold.Core.CLIHelper' },
-			{ NPM : 'Mold.Core.NPM' },
 			{ File : 'Mold.Core.File' },
+			{ Logger : 'Mold.Core.Logger' },
 			'Mold.CMD.GetMoldJson',
-			'Mold.CMD.CopySeed'
+			{ PackageInfo : 'Mold.Core.PackageInfo' }
 		]
 	},
 	function(){
@@ -59,14 +54,13 @@ Seed({
 								var dependencies = result.parameter.source[0].data.dependencies;
 								var selected = null;
 								var others = [];
-								console.log("DEPS")
 								for(var i = 0; i < dependencies.length; i++){
 									if(name && dependencies[i].name === name){
 										selected = dependencies[i];
+										break;
 									}else if(path && dependencies[i].path === path){
 										selected = dependencies[i];
-									}else{
-										others.push(dependencies[i]);
+										break;
 									}
 								}
 
@@ -74,39 +68,28 @@ Seed({
 									reject(new Mold.Errors.CommandError("Package not found!", "uninstall"));
 									return;
 								}
-
 								var diffSteps = [];
-								var diff = null;
-
+								var sourceDiff = [];
 								diffSteps.push(function(){
-									console.log("GET PACKAGEINFO", selected.path)
-									return Command
-												.getPackageInfo({ '-p' : selected.path})
-												.then(function(selectedInfo){
-													diff = selectedInfo.packageInfo;
-													console.log("DIFF STEPS", selected.path)
-												})
-								})
 
-								others.forEach(function(dep){
-									diffSteps.push(function(){
-										console.log("GET", dep.path)
-										return Command
-													.getPackageInfo({ '-p' : dep.path})
-													.then(function(depInfo){
-														
-														diff = Mold.diff(diff, depInfo.packageInfo);
-													})
-									})
+									return PackageInfo.get(name).then(function(packageInfo){
+										Logger.log("current pack", packageInfo.source)
+										PackageInfo.get().then(function(allPackage){
+											allPac
+										})
+									});
 								});
 
-								Promise
-									.waterfall(diffSteps)
-									.then(function(){
-										console.log("DIF", diff)
-									})
-									.catch(reject);
-
+								try {
+									Promise
+										.waterfall(diffSteps)
+										.then(function(){
+											//console.log("DIF", diff)
+										})
+										.catch(reject);
+								}catch(err){
+									reject(err)
+								}
 							}else{
 								reject(new Mold.Errors.CommandError("No dependencies found!", "uninstall"))
 							}

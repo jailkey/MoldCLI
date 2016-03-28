@@ -12,6 +12,11 @@
 			"name": "Mold",
 			"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
 			"version": "0.2.3"
+		},
+		{
+			"name": "Test",
+			"path": "http://localhost/Test",
+			"version": "0.0.1"
 		}
 	]
 }

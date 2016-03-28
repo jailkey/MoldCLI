@@ -1844,20 +1844,38 @@
 				return true;
 			},
 
-			isHttpPath : function(path){
+			/**
+			 * @method isHttp 
+			 * @description checks if a path is a http or https path
+			 * @param  {string}  path - the path to check
+			 * @return {boolean} returns true if the path is a http path otherwise it returns false
+			 */
+			isHttp : function(path){
 				if(path.startsWith('http:') || path.startsWith('https:')){
 					return true;
 				}
 				return false;
 			},
 
-			isHttpsPath : function(path){
+			/**
+			 * @method  isHttps 
+			 * @description checks if a path is a https path
+			 * @param  {string}  path  - the path to check
+			 * @return {boolean}  returns true if the path is a https path otherwise it returns false
+			 */
+			isHttps : function(path){
 				if(path.startsWith('https:')){
 					return true;
 				}
 				return false;
 			},
 
+			/**
+			 * @method camelToHypen 
+			 * @description converts a camelcase to a hypen
+			 * @param  {string} camel - the camelcase
+			 * @return {string} returns a path with hypens instade of camelcase
+			 */
 			camelToHypen : function(camel){
 				var camel = camel.replace(/\./g, '-');
 				var output = "";
@@ -2453,8 +2471,8 @@
 
 		var _content = null;
 		var _encoding = encoding || 'utf8';
-		var _isHttp = __Mold.Core.Pathes.isHttpPath(filename);
-		var _isHttps = __Mold.Core.Pathes.isHttpsPath(filename);
+		var _isHttp = __Mold.Core.Pathes.isHttp(filename);
+		var _isHttps = __Mold.Core.Pathes.isHttps(filename);
 
 		var _ajaxLoader = function(){
 
@@ -2521,8 +2539,9 @@
 								if(err){
 									reject(err)
 								}
-								
-								_content = _convertData(data);
+								if(data){
+									_content = _convertData(data);
+								}
 								resolve(_content);
 								
 							})
@@ -2558,11 +2577,20 @@
 		
 		}
 
-		var _convertData = function(data){
+		var _convertData = function(data, direction){
 			if(format){
-				switch(format){
-					case "json":
-						return JSON.parse(data);
+				var undefined;
+				direction = direction || "input";
+				if(direction === "input"){
+					switch(format.toLowerCase()){
+						case "json":
+							return JSON.parse(data);
+					}
+				}else if(direction === "output"){
+					switch(format.toLowerCase()){
+						case "json":
+							return JSON.stringify(data, undefined, '\t')
+					}
 				}
 			}
 			return data;
@@ -2608,7 +2636,8 @@
 				throw new Error("The 'save' method is only available on nodejs [Mold.Core.File]")
 			}
 			return new __Mold.Core.Promise(function(resolve, reject){
-				fs.writeFile(filename, _content, function(err) {
+
+				fs.writeFile(filename, _convertData(_content, "output"), function(err) {
 					if(err) {
 						return reject(err);
 					}
@@ -2924,7 +2953,7 @@
 				path = __Mold.Core.Pathes.cleanPath(path);
 
 				//if path is a http path skip testing and return path
-				if(__Mold.Core.Pathes.isHttpPath(path)){
+				if(__Mold.Core.Pathes.isHttp(path)){
 					return path;
 				}
 

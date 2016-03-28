@@ -38,6 +38,12 @@ Seed({
 				},
 				'--of' : {
 					'alias' : '--overwrite-file'
+				},
+				'--file' : {
+					'description' : 'force createing a file!'
+				},
+				'--dir' : {
+					'description' : 'force createing a direcotry!'
 				}
 			},
 			code : function(args){
@@ -78,7 +84,7 @@ Seed({
 						var type = 'file';
 						if(i + 1 < pathParts.length){
 							type = 'dir';
-						}else if(!~pathParts[i].indexOf(".")){
+						}else if(!~pathParts[i].indexOf(".") || args.parameter['--dir']){
 							type = 'dir';
 						}
 

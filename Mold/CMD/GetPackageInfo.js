@@ -79,6 +79,7 @@ Seed({
 
 							var path =  args.parameter['-path'].value;
 							var currentPath = path;
+							var currentPackageName = response.parameter.source[0].data.name;
 							var waterfall = [];
 							var getRepoVM = new VM({
 								configPath : path
@@ -91,6 +92,7 @@ Seed({
 									
 									if(source.endsWith('/')){
 										collected.linkedSources.push({
+											packageName : currentPackageName,
 											path : source,
 											type : 'dir'
 										})
@@ -101,6 +103,7 @@ Seed({
 										}
 										var filePath = currentPath + source;
 										collected.linkedSources.push({
+											packageName : currentPackageName,
 											path : source,
 											filePath : filePath,
 											type : 'file'
@@ -161,9 +164,10 @@ Seed({
 												if(linkedDependencies.length){
 													var depWaterfall = [];
 													linkedDependencies.forEach(function(currentDep){
+														var packageInfoPath = (Mold.Core.Pathes.isHttp(currentDep.path)) ? currentDep.path : currentPath + currentDep.path;
 														depWaterfall.push(function(){
 															return Command
-																		.execute('get-package-info', { '-p' : currentPath + currentDep.path })
+																		.execute('get-package-info', { '-p' : packageInfoPath })
 																		.then(function(foundInfo){
 																			foundInfo.packageInfo.linkedSeeds = _addCurrentVersion(foundInfo.packageInfo.linkedSeeds, currentDep.currentVersion)
 																			collected = Mold.merge(collected, foundInfo.packageInfo, { concatArrays : true, without : [ 'currentPackage'] });
