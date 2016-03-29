@@ -52,6 +52,7 @@ Seed({
 					var loader = Helper.loadingBar("get package info ");
 					var _packageSources = {};
 					var _packageDep = {};
+					var gitIgnor = [];
 					var _collectSource = function(name, source, type){
 						_packageSources[name] = _packageSources[name] || [];
 						_packageSources[name].push({
@@ -106,8 +107,10 @@ Seed({
 											//create directory
 											sourcePromises.push(Command.createPath({ '-path' : source.path, '--silent' : true }))
 										}else if(source.type === 'file'){
+
 											var file = new File(source.filePath);
 											_collectSource(source.packageName, source.path, 'file')
+											gitIgnor.push(source.path);
 											sourcePromises.push(file.copy(source.path))
 										}
 											
@@ -147,7 +150,7 @@ Seed({
 							installSteps.push(function(){
 								return new Promise(function(resolveCopy, rejectCopy){
 									var seeds = [];
-									var gitIgnor = [];
+									
 									var outputPromise = null;
 									//copy seeds
 									for(var seedName in response.packageInfo.linkedSeeds){
