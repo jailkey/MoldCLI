@@ -12,6 +12,7 @@ Seed({
 
 		var MoldVM = function(conf){
 			conf = conf || {};
+
 			this.sandbox = {
 				global : { 
 					global : {},
@@ -32,8 +33,8 @@ Seed({
 					}
 				}
 			}
-
 			instanceCount++;
+			
 			Mold.copyGlobalProperties(this.sandbox);
 
 			this.moldPath = conf.moldPath || 'Mold.js',
@@ -53,8 +54,6 @@ Seed({
 			//load core
 			var moldJsPath = (Mold.Core.Config.search('config-path')) ? Mold.Core.Config.search('config-path') + this.moldPath :  this.moldPath;
 			var data = this.fs.readFileSync(moldJsPath);
-
-			data =+ "var fs = {}";
 
 			var moldScript = new this.vm.Script(data);
   			moldScript.runInContext(this.context, { filename : "Mold.Core.VM" });

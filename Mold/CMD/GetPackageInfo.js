@@ -134,6 +134,7 @@ Seed({
 
 							waterfall.push(function(){
 								return new Promise(function(resolveDep, rejectDep){
+
 									getRepoVM.Mold.Core.Config.isReady.then(function(){
 										var loadSeeds = [];
 										var linkedSeeds = response.parameter.source[0].data.seeds;
