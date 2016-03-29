@@ -134,7 +134,6 @@ Seed({
 								
 								//delete sources 
 								diffSteps.push(function(){
-									Logger.log("packageInfoDiff", packageInfoDiff)
 									var remover = [];
 									packageInfoDiff.sources.forEach(function(source){
 										if(Mold.Core.Pathes.exists(source.path, 'file')){
@@ -171,7 +170,7 @@ Seed({
 									Promise
 										.waterfall(diffSteps)
 										.then(function(){
-											Helper.ok("Package " + name + " successfully uninstalled!").lb()
+											Helper.ok("Package '" + name + "' successfully uninstalled!").lb()
 										})
 										.catch(reject);
 								}catch(err){

@@ -67,6 +67,12 @@ Seed({
 								throw new Error("Source is not defined")
 							}
 
+							if(response.parameter.source[0].data.name === Mold.Core.Config.get('name')){
+								args.packageInfo = {};
+								resolve(args);
+								return;
+							}
+
 							var collected = {
 								currentPackage : response.parameter.source[0].data,
 								linkedSeeds : {},
@@ -76,6 +82,9 @@ Seed({
 								linkedNpmDependencies : {},
 								linkedSources : [],
 							}
+
+
+							
 
 							var path =  args.parameter['-path'].value;
 							var currentPath = path;

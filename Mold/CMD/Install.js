@@ -52,12 +52,26 @@ Seed({
 					var loader = Helper.loadingBar("get package info ");
 					var _packageSources = {};
 					var _packageDep = {};
-					var gitIgnor = [];
+					var _gitIgnorSources = [];
+
 					var _collectSource = function(name, source, type){
 						_packageSources[name] = _packageSources[name] || [];
 						_packageSources[name].push({
 							path : source,
 							type : type
+						})
+					}
+
+					var _addToGitIgnor = function(path){
+						if(!~_gitIgnorSources.indexOf(path)){
+							_gitIgnorSources.push(path)
+						}
+					}
+
+					var _isInstalledPackage = function(name){
+						var installedDep = Mold.Core.Config.get('dependencies', 'local');
+						return !!installedDep.find(function(current){
+							return (current.name === name) ? true : false;
 						})
 					}
 
@@ -100,18 +114,19 @@ Seed({
 								var sourcePromises = [];
 								installSteps.push(function(){
 									response.packageInfo.linkedSources.forEach(function(source){
-										loader.text("add source " + source.path)
-										if(source.type === 'dir'){
-											_collectSource(source.packageName, source.path, 'dir');
-										
-											//create directory
-											sourcePromises.push(Command.createPath({ '-path' : source.path, '--silent' : true }))
-										}else if(source.type === 'file'){
+										if(!_isInstalledPackage(source.packageName)){
+											loader.text("add source " + source.path)
+											if(source.type === 'dir'){
+												_collectSource(source.packageName, source.path, 'dir');
+												//create directory
+												sourcePromises.push(Command.createPath({ '-path' : source.path, '--silent' : true }))
+											}else if(source.type === 'file'){
 
-											var file = new File(source.filePath);
-											_collectSource(source.packageName, source.path, 'file')
-											gitIgnor.push(source.path);
-											sourcePromises.push(file.copy(source.path))
+												var file = new File(source.filePath);
+												_collectSource(source.packageName, source.path, 'file')
+												_addToGitIgnor(source.path);
+												sourcePromises.push(file.copy(source.path))
+											}
 										}
 											
 									});
@@ -147,15 +162,16 @@ Seed({
 								return repoPromis.all(repos)
 							})
 
+							//copy seeds
 							installSteps.push(function(){
-								return new Promise(function(resolveCopy, rejectCopy){
-									var seeds = [];
-									
-									var outputPromise = null;
-									//copy seeds
-									for(var seedName in response.packageInfo.linkedSeeds){
-										var seedPath = response.packageInfo.linkedSeeds[seedName].path;
-										if(seedPath){
+						
+								var seeds = [];
+								var outputPromise = null;
+
+								for(var seedName in response.packageInfo.linkedSeeds){
+									var seedPath = response.packageInfo.linkedSeeds[seedName].path;
+									if(seedPath){
+										if(!_isInstalledPackage(response.packageInfo.linkedSeeds[seedName].packageName)){
 											//copy seeds
 											seeds.push(function(){
 												var packageName = response.packageInfo.linkedSeeds[seedName].packageName;
@@ -167,42 +183,33 @@ Seed({
 												.then(function(seedArgs){
 													loader.text("copy seed " + seedArgs.parameter['-name'].value);
 													_collectSource(packageName, seedArgs.parameter['-target'], 'file');
+													_addToGitIgnor('/' + seedArgs.parameter['-target']);
 												})
-												.catch(rejectCopy)
 											}());
-											//add to git ignore
-											gitIgnor.push(function(){
-												var name = seedName;
-												return function(){
-													return Command.gitIgnore({ 
-																'-path' :  '/' + Mold.Core.Pathes.getPathFromName(name, true), 
-																'--add' : true, 
-																'--silent' : true
-															})
-															.catch(rejectCopy);
-												}
-											}())
 										}
+										
 									}
+								}
 
-									Promise
-										.all(seeds)
-										.then(function(){
-											if(args.parameter['--without-git-ignore']){
-												resolveCopy(args);
-											}else{
-												Promise
-													.waterfall(gitIgnor)
-													.then(function(){
-														resolveCopy(args);
-													//	Helper.info("Dependencies added to .gitignore!").lb();
-													})
-											}
-										})
-										.catch(rejectCopy)
-								});
-
+								return Promise.all(seeds);
 							});
+
+							//add to git ignore
+							installSteps.push(function(){
+								var gitIgnorAdds = [];
+								if(!args.parameter['--without-git-ignore']){
+									_gitIgnorSources.forEach(function(path){
+										gitIgnorAdds.push(function(){
+											return Command.gitIgnore({ 
+												'-path' : path,
+												'--add' : true
+											});
+										});
+									})
+								}
+
+								return Promise.waterfall(gitIgnorAdds);
+							})
 							
 							//create mold installation dir
 							installSteps.push(function(){
