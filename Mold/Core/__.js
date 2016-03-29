@@ -5,7 +5,8 @@ Seed({
 			".Validation",
 			".Version",
 			".NPM",
-			".VM"
+			".VM",
+			".Sequence"
 		]
 	},
 	function(modul){}

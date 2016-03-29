@@ -93,12 +93,11 @@ Seed({
 										}
 										compareSteps.push(function(){
 											var currentName = currentDep.name;
-
 											return function(){
-
 												return PackageInfo
 														.get(currentName)
 														.then(function(selectedPackage){
+
 															//compare sources
 															packageInfoDiff.sources = packageInfoDiff.sources.filter(function(selected){
 																if(selectedPackage && selectedPackage.sources){

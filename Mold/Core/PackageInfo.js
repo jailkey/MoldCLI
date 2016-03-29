@@ -141,6 +141,7 @@ Seed({
 						this.setPackages(filterd)
 							.then(resolve)
 							.catch(reject);
+							
 					}.bind(this))
 					.catch(reject)
 				}.bind(this))

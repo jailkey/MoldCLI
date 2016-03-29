@@ -7,7 +7,15 @@
 					"type": "file"
 				},
 				{
+					"path": "Mold/Core/NPM.js",
+					"type": "file"
+				},
+				{
 					"path": "Mold/Core/__.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Sequence.js",
 					"type": "file"
 				},
 				{
@@ -19,7 +27,7 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/NPM.js",
+					"path": "Mold.js",
 					"type": "file"
 				}
 			],

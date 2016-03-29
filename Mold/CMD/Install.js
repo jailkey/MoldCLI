@@ -202,7 +202,8 @@ Seed({
 										gitIgnorAdds.push(function(){
 											return Command.gitIgnore({ 
 												'-path' : path,
-												'--add' : true
+												'--add' : true,
+												'--silent' : true
 											});
 										});
 									})
