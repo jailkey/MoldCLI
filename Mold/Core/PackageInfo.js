@@ -111,11 +111,40 @@ Seed({
 						.catch(reject)
 				}.bind(this))
 			},
+			setPackages : function(data){
+				return new Promise(function(resolve, reject){
+					var path = this.infoDir + this.packageInfoFile;
+					Command.createPath({ '-p' : path, '--silent' : true})
+						.then(function(){
+							var file = new File(path, "json");
+							file.content = { packages : data }
+							file.save()
+								.then(resolve)
+								.catch(reject)
+						})
+						.catch(reject);
+				}.bind(this))
+			},
 			remove : function(packageName){
 				if(!packageName){
 					reject(new Error("Package name not given! [Mold.Core.PackageInfo]"));
 					return;
 				}
+				return new Promise(function(resolve, reject){
+					this.get().then(function(all){
+						var filterd = {};
+						for(var current in all){
+							if(current !== packageName){
+								filterd[current] = all[current];
+							}
+						}
+						this.setPackages(filterd)
+							.then(resolve)
+							.catch(reject);
+					}.bind(this))
+					.catch(reject)
+				}.bind(this))
+				
 			}
 		}
 

@@ -67,13 +67,14 @@ Seed({
 								}
 
 								if(!selected){
-									reject(new Mold.Errors.CommandError("Package not found!", "uninstall"));
+									reject(new Mold.Errors.CommandError("Package not found! [" + ((path) ? path : ' ') + ((name) ? name : '') + "]", "uninstall"));
 									return;
 								}
 								
 								var diffSteps = [];
 								var sourceDiff = [];
 								var packageInfoDiff = {};
+								name = selected.name;
 
 								//get current
 								diffSteps.push(function(){
@@ -98,7 +99,6 @@ Seed({
 												return PackageInfo
 														.get(currentName)
 														.then(function(selectedPackage){
-
 															//compare sources
 															packageInfoDiff.sources = packageInfoDiff.sources.filter(function(selected){
 																if(selectedPackage && selectedPackage.sources){
@@ -137,17 +137,41 @@ Seed({
 									Logger.log("packageInfoDiff", packageInfoDiff)
 									var remover = [];
 									packageInfoDiff.sources.forEach(function(source){
-										var file = new Mold.Core.File(source.path);
-										remover.push(file.remove())
+										if(Mold.Core.Pathes.exists(source.path, 'file')){
+											var file = new Mold.Core.File(source.path);
+											remover.push(file.remove())
+										}
 									})
 									return Promise.all(remover);
+								});
+
+								//remove related dependecies
+								diffSteps.push(function(){
+									var uninstalls = [];
+									packageInfoDiff.dependencies.forEach(function(dep){
+										uninstalls.push(function() { return PackageInfo.remove(dep.name) });
+									});
+									return Promise.waterfall(uninstalls);
+								})
+
+								//remove from package info
+								diffSteps.push(function(){
+									return PackageInfo.remove(selected.name);
+								})
+
+								//remove from mold.json (if defined)
+								diffSteps.push(function(){
+									var filterdDependencies = dependencies.filter(function(currentDep){
+										return (currentDep.name === selected.name) ? false : true;
+									})
+									return Command.updateMoldJson({ '-property' : 'dependencies', '-value' : filterdDependencies, '--silent' : true})
 								})
 
 								try {
 									Promise
 										.waterfall(diffSteps)
 										.then(function(){
-											//console.log("DIF", diff)
+											Helper.ok("Package " + name + " successfully uninstalled!").lb()
 										})
 										.catch(reject);
 								}catch(err){
@@ -156,13 +180,6 @@ Seed({
 							}else{
 								reject(new Mold.Errors.CommandError("No dependencies found!", "uninstall"))
 							}
-
-								/*
-								Command.getPackageInfo({ '-p' : path})
-									.then(function(response){			
-										reps
-
-									})*/
 						})
 					
 			
