@@ -41,6 +41,9 @@ Seed({
 				}
 
 				var _entryExists = function(content, entry){
+					if(!content){
+						return false;
+					}
 					var lines = content.split('\n');
 					for(var i = 0; i < lines.length; i++){
 						var line = lines[i];
@@ -52,6 +55,9 @@ Seed({
 				}
 
 				var _removeEntry = function(content, entry){
+					if(!content){
+						return "";
+					}
 					var lines = content.split('\n');
 					var outputContent = "";
 					for(var i = 0; i < lines.length; i++){
