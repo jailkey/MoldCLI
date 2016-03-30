@@ -437,6 +437,13 @@
 			return false;
 		},
 
+		isString : function(value){
+			if(typeof value === "string"){
+				return true;
+			}
+			return false;
+		},
+
 		/**
 		* @namespace Mold
 		* @methode isNodeList
@@ -1018,12 +1025,14 @@
 			hasDependency : function(name){
 				for(var i = 0; i < this.dependencies.length; i++){
 					var value = this.dependencies[i];
-					if(typeof value === "string"){
-						return (value === name) ? true : false;
-					}else{
-						return (value.name === name) ? true : false;
+					if(
+						(typeof value === "string" && value === name)
+						|| (typeof value === "object" && value.name === name)
+					){
+						return true;
 					}
 				}
+				return false;
 			},
 
 			/**
@@ -1286,7 +1295,8 @@
 					}
 				}
 
-				__Mold.Core.NamespaceManager.addCode(this.name, typeHandler.create(this));
+				this.excutedValue = typeHandler.create(this);
+				__Mold.Core.NamespaceManager.addCode(this.name, this.excutedValue);
 			}
 		}
 
@@ -1681,7 +1691,7 @@
 					var depSeed = __Mold.Core.SeedManager.get(seed.dependencies[i]);
 					if(depSeed){
 						if(depSeed.hasDependency(seed.name)){
-							throw new Error("There is a circular dependency on " + seed.name + " between " + depSeed.name);
+							throw new Error("There is a circular dependency between " + seed.name + " and " + depSeed.name);
 						}
 						seedsLoades.push(depSeed.isReady);
 					}else{

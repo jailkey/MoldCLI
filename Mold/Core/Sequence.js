@@ -48,7 +48,7 @@ Seed({
 
 		var _step = function(callback){
 			_stepAction = callback;
-			_nextStep = new Mold.Lib.Sequence();
+			_nextStep = new Mold.Core.Sequence();
 			_nextStep.setState("pending");
 			_nextStep.setPrevious(that);
 			_resolve();

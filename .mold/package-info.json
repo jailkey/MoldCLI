@@ -3,11 +3,7 @@
 		"Mold": {
 			"sources": [
 				{
-					"path": "Mold/Core/Validation.js",
-					"type": "file"
-				},
-				{
-					"path": "Mold/Core/__.js",
+					"path": "Mold/Core/NPM.js",
 					"type": "file"
 				},
 				{
@@ -23,7 +19,11 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/NPM.js",
+					"path": "Mold/Core/Validation.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/__.js",
 					"type": "file"
 				},
 				{
