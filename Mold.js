@@ -1016,9 +1016,14 @@
 			 * @return {boolean} returns true if the seed has the given dependency otherwise it return false
 			 */
 			hasDependency : function(name){
-				return this.dependencies.find(function(value){
-					return (value.name === name) ? true : false;
-				});
+				for(var i = 0; i < this.dependencies.length; i++){
+					var value = this.dependencies[i];
+					if(typeof value === "string"){
+						return (value === name) ? true : false;
+					}else{
+						return (value.name === name) ? true : false;
+					}
+				}
 			},
 
 			/**
@@ -1675,6 +1680,9 @@
 				for(var i = 0; i < seed.dependencies.length; i++){
 					var depSeed = __Mold.Core.SeedManager.get(seed.dependencies[i]);
 					if(depSeed){
+						if(depSeed.hasDependency(seed.name)){
+							throw new Error("There is a circular dependency on " + seed.name + " between " + depSeed.name);
+						}
 						seedsLoades.push(depSeed.isReady);
 					}else{
 						var promise =  __Mold.load(seed.dependencies[i]);
@@ -3170,7 +3178,7 @@
 			)
 			.add(
 				this.Core.SeedFactory({
-					name : "SeedTypeManager",
+					name : "Mold.Core.SeedTypeManager",
 					state : this.Core.SeedStates.READY,
 					code : this.Core.SeedTypeManager
 				})
