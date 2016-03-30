@@ -3168,6 +3168,13 @@
 					code : this.Core.Config
 				})
 			)
+			.add(
+				this.Core.SeedTypeManager({
+					name : "SeedTypeManager",
+					state : this.Core.SeedStates.READY,
+					code : this.Core.SeedTypeManager
+				})
+			)
 
 			//load main seeds
 			var mainSeedPromises = []
