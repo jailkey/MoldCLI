@@ -3169,7 +3169,7 @@
 				})
 			)
 			.add(
-				this.Core.SeedTypeManager({
+				this.Core.SeedFactory({
 					name : "SeedTypeManager",
 					state : this.Core.SeedStates.READY,
 					code : this.Core.SeedTypeManager
