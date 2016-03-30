@@ -7,11 +7,11 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/Validation.js",
+					"path": "Mold/Core/VM.js",
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/Version.js",
+					"path": "Mold/Core/Validation.js",
 					"type": "file"
 				},
 				{
@@ -19,7 +19,7 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/VM.js",
+					"path": "Mold/Core/Version.js",
 					"type": "file"
 				},
 				{

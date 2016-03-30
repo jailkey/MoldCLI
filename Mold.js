@@ -1196,8 +1196,15 @@
 				if(!this.fileData){
 					throw new Error("Can not created script without file data! [" + this.name + "]");
 				}
-				
+
 				var fileData = "//" + this.name + " \n";
+
+				var typeHandler = __Mold.Core.SeedTypeManager.get(this.type);
+				if(typeHandler && typeHandler.preCreate){
+					this.fileData = typeHandler.preCreate(this.fileData);
+				}
+				
+				
 				fileData += "(function() { var Seed = function(info, code) {  Mold.Core.SeedManager.catchSeed(info, code, " + this.sid + ")}\n" + this.fileData + "})()";
 				this._addedLines = this._addedLines + 2; 
 				fileData += this.buildSourceMap();
