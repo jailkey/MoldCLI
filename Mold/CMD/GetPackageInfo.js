@@ -68,7 +68,8 @@ Seed({
 							}
 
 							if(response.parameter.source[0].data.name === Mold.Core.Config.get('name')){
-								args.packageInfo = {};
+								collected.currentPackage = null;
+								args.packageInfo = collected;
 								resolve(args);
 								return;
 							}

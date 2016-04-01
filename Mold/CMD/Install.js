@@ -80,6 +80,11 @@ Seed({
 							var repoPromis = new Promise();
 							var repos = [];
 							var installSteps = [];
+							//if it is null the user tried to install a packeg into itself
+							if(response.packageInfo.currentPackage === null){
+								reject(new Mold.Errors.CommandError("You can not install a package into it self!", "install"))
+								return;
+							}
 							
 							//create repositorys
 							for(repoName in response.packageInfo.repositories){
