@@ -10,7 +10,7 @@ Seed({
 		//	'Mold.Lib.Event',
 		//	'Mold.Tools.CLIForm',
 			{ Promise : 'Mold.Core.Promise' },
-			{ CLIHelper : 'Mold.Core.ClIHelper' },
+			{ CLIHelper : 'Mold.Core.CLIHelper' },
 			{ Command : 'Mold.Core.Command' },
 			{ Logger : 'Mold.Core.Logger' }
 		]

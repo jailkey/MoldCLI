@@ -232,7 +232,8 @@ Seed({
 											}).catch(rejectDep)
 
 										}else{
-											rejectDep(new Error("No linked Seeds found in " + path.value + "!"))
+											resolveDep(args);
+											//rejectDep(new Error("No linked Seeds found in " + path.value + "!"))
 										}
 									
 									})

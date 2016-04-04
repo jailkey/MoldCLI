@@ -5,7 +5,7 @@ Seed({
 		include : [
 			{ Command : 'Mold.Core.Command' },
 			{ Promise : 'Mold.Core.Promise' },
-			{ Helper : 'Mold.Core.ClIHelper'},
+			{ Helper : 'Mold.Core.CLIHelper'},
 			"Mold.CMD.GetMoldJson"
 		]
 	},

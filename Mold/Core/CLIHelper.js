@@ -1,6 +1,6 @@
 //!info transpiled
 /**
- * @module Mold.Core.ClIHelper
+ * @module Mold.Core.CLIHelper
  * @description static object provides methods to handle the command line interface
  */
 Seed({
