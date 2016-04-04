@@ -143,18 +143,20 @@ Seed({
 
 									getRepoVM.Mold.Core.Config.isReady.then(function(){
 										var loadSeeds = [];
-										var linkedSeeds = response.parameter.source[0].data.seeds;
-										var responsData = response.parameter.source[0].data;
+										var responseData = response.parameter.source[0].data;
+										var linkedSeeds = responseData.seeds || [];
 										var linkedDependencies = [];
 
+										linkedSeeds = (responseData.mainSeeds) ? linkedSeeds.concat(responseData.mainSeeds) : linkedSeeds;
+
 										if(!args.parameter['--no-packages'] && !args.parameter['--no-dependencies']){
-											linkedDependencies = responsData.dependencies || [];
+											linkedDependencies = responseData.dependencies || [];
 										}
-										responsData.path = path;
-										collected.linkedPackages.push(responsData);
-										if(responsData.repositories){
-											for(var repoName in responsData.repositories){
-												collected.repositories[repoName] =  responsData.repositories[repoName];
+										responseData.path = path;
+										collected.linkedPackages.push(responseData);
+										if(responseData.repositories){
+											for(var repoName in responseData.repositories){
+												collected.repositories[repoName] =  responseData.repositories[repoName];
 											}
 										}
 										if(linkedSeeds){
@@ -171,8 +173,8 @@ Seed({
 													result.forEach(function(seed){
 														collected.linkedSeeds[seed.name] = { 
 															path : seed.path,
-															packageName : responsData.name,
-															packageVersion : responsData.version,
+															packageName : responseData.name,
+															packageVersion : responseData.version,
 															hasLoadingError : false
 														};
 													})
@@ -232,8 +234,7 @@ Seed({
 											}).catch(rejectDep)
 
 										}else{
-											resolveDep(args);
-											//rejectDep(new Error("No linked Seeds found in " + path.value + "!"))
+											rejectDep(new Error("No linked Seeds found in " + path.value + "!"))
 										}
 									
 									})

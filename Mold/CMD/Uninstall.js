@@ -80,7 +80,7 @@ Seed({
 								diffSteps.push(function(){
 									
 									return PackageInfo.get(name, true).then(function(packageInfo){
-										packageInfoDiff = packageInfo;
+										packageInfoDiff = packageInfo || {};
 									});
 								});
 
@@ -136,24 +136,28 @@ Seed({
 									return Promise.waterfall(compareSteps);
 								});
 								
-								//delete sources 
+								//delete sources
 								diffSteps.push(function(){
 									var remover = [];
-									packageInfoDiff.sources.forEach(function(source){
-										if(Mold.Core.Pathes.exists(source.path, 'file')){
-											var file = new Mold.Core.File(source.path);
-											remover.push(file.remove())
-										}
-									})
+									if(packageInfoDiff.sources){
+										packageInfoDiff.sources.forEach(function(source){
+											if(Mold.Core.Pathes.exists(source.path, 'file')){
+												var file = new Mold.Core.File(source.path);
+												remover.push(file.remove())
+											}
+										})
+									}
 									return Promise.all(remover);
 								});
 
 								//remove related dependecies
 								diffSteps.push(function(){
 									var uninstalls = [];
-									packageInfoDiff.dependencies.forEach(function(dep){
-										uninstalls.push(function() { return PackageInfo.remove(dep.name) });
-									});
+									if(packageInfoDiff.dependencies){
+										packageInfoDiff.dependencies.forEach(function(dep){
+											uninstalls.push(function() { return PackageInfo.remove(dep.name) });
+										});
+									}
 									return Promise.waterfall(uninstalls);
 								})
 
