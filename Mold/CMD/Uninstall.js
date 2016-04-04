@@ -99,32 +99,36 @@ Seed({
 														.then(function(selectedPackage){
 
 															//compare sources
-															packageInfoDiff.sources = packageInfoDiff.sources.filter(function(selected){
-																if(selectedPackage && selectedPackage.sources){
-																	for(var i = 0; i < selectedPackage.sources.length; i++){
-																		if(selected.path === selectedPackage.sources[i].path){
-																			return false;
+															if(packageInfoDiff.sources && packageInfoDiff.sources.length){
+																packageInfoDiff.sources = packageInfoDiff.sources.filter(function(selected){
+																	if(selectedPackage && selectedPackage.sources){
+																		for(var i = 0; i < selectedPackage.sources.length; i++){
+																			if(selected.path === selectedPackage.sources[i].path){
+																				return false;
+																			}
 																		}
 																	}
-																}
-																return true;
-															})
+																	return true;
+																})
+															}
 
 															//compare dependencies
-															packageInfoDiff.dependencies = packageInfoDiff.dependencies.filter(function(selected){
-																if(selectedPackage && selectedPackage.dependencies){
-																	for(var i = 0; i < selectedPackage.dependencies.length; i++){
+															if(packageInfoDiff.dependencies && packageInfoDiff.dependencies.length){
+																packageInfoDiff.dependencies = packageInfoDiff.dependencies.filter(function(selected){
+																	if(selectedPackage && selectedPackage.dependencies){
+																		for(var i = 0; i < selectedPackage.dependencies.length; i++){
 
-																		if(selected.name === selectedPackage.dependencies[i].name){
-																			return false;
+																			if(selected.name === selectedPackage.dependencies[i].name){
+																				return false;
+																			}
 																		}
 																	}
-																}
-																if(selected.name === currentName){
-																	return false;
-																}
-																return true;
-															})
+																	if(selected.name === currentName){
+																		return false;
+																	}
+																	return true;
+																})
+															}
 														});
 											}
 										}())

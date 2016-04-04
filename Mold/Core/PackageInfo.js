@@ -41,27 +41,28 @@ Seed({
 												for(var i = 0; i < results.length; i++){
 													output.dependencies =  output.dependencies || [];
 													output.sources =  output.sources  || [];
-													for(var y = 0; y < results[i].dependencies.length; y++){
-														if(!output.dependencies.find(function(entry){
-																return entry.name === results[i].dependencies[y].name;
-															})
-														){
-															output.dependencies.push(results[i].dependencies[y]);
+													if(results[i]){
+														for(var y = 0; y < results[i].dependencies.length; y++){
+															if(!output.dependencies.find(function(entry){
+																	return entry.name === results[i].dependencies[y].name;
+																})
+															){
+																output.dependencies.push(results[i].dependencies[y]);
+															}
+														}
+														for(var y = 0; y < results[i].sources.length; y++){
+															if(!output.sources.find(function(entry){
+																	return entry.path === results[i].sources[y].path;
+																})
+															){
+																output.sources.push(results[i].sources[y]);
+															}
 														}
 													}
-													for(var y = 0; y < results[i].sources.length; y++){
-														if(!output.sources.find(function(entry){
-																return entry.path === results[i].sources[y].path;
-															})
-														){
-															output.sources.push(results[i].sources[y]);
-														}
-													}
-													
 												}
 												resolve(output);
 											}).catch(function(err){
-												reject(reject)
+												reject(err)
 											})
 									}else{
 										resolve(data.packages[packageName]);
