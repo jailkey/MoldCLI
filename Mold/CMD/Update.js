@@ -31,9 +31,33 @@ Seed({
 				}
 			},
 			code : function(args){
+				var force = args.parameter['--force'];
+
+				var _getInfoHelper = function(dep, infos, updateDep, collectedDependencies){
+					return new Promise(function(resolveDep, rejectDep){
+						//get all infos
+						Command.getPackageInfo({ '-p' : dep.path }).then(function(info){
+							packageInfo = info.packageInfo;
+							var result = Version.compare(packageInfo.currentPackage.version, dep.version);
+							collectedDependencies[packageInfo.currentPackage.name] = true;
+							if(result === "bigger" || force){
+								infos.push(packageInfo);
+								updateDep[dep.name] = packageInfo.currentPackage.version;
+							}else if(result === "equal"){
+								Helper.info(dep.name + " is up to date!").lb();
+							}else{
+								Helper.warn(dep.name + "(" + packageInfo.currentPackage.version + ") the dependecy version is smaller then the current one, something is very strange! [" + result + "]").lb();
+							}
+
+							resolveDep(packageInfo);
+
+						}).catch(rejectDep);
+
+					})
+				}
 
 				return new Promise(function(resolve, reject){
-					var force = args.parameter['--force'];
+					
 					var copiedSources = {};
 					var collectedSources = {};
 					Command.getMoldJson({ '-p' : '' }).then(function(moldJson){
@@ -48,33 +72,38 @@ Seed({
 							var updateDep = {};
 							var updateSteps = [];
 							var collectedPackageInfos =  {};
+							var collectedDependencies = {};
 
+							//get dependencies
 							moldJson.dependencies.forEach(function(dep){
-								infoPromises.push(new Promise(function(resolveDep, rejectDep){
-									//get all infos
-									Command.getPackageInfo({ '-p' : dep.path }).then(function(info){
-										packageInfo = info.packageInfo;
-										var result = Version.compare(packageInfo.currentPackage.version, dep.version);
-
-										if(result === "bigger" || force){
-											infos.push(packageInfo);
-											updateDep[dep.name] = packageInfo.currentPackage.version;
-										}else if(result === "equal"){
-											Helper.info(dep.name + " is up to date!").lb();
-										}else{
-											Helper.warn(dep.name + "(" + packageInfo.currentPackage.version + ") the dependecy version is smaller then the current one, something is very strange! [" + result + "]").lb();
-										}
-
-										resolveDep(packageInfo);
-
-									}).catch(rejectDep);
-
-								}));
+								infoPromises.push(_getInfoHelper(dep, infos, updateDep, collectedDependencies));
 							});
 
 							updateSteps.push(function(){
 								return Promise.all(infoPromises)
 							});
+
+							//get sub dependencies
+							updateSteps.push(function(){
+								var collectedSubDependencies = {};
+								var subInfosPromises = [];
+								infos.forEach(function(dep){
+									//console.log("DEP", dep.linkedPackages)
+									dep.linkedPackages.forEach(function(linkedPackage){
+										if(!collectedDependencies[linkedPackage.name]){
+											collectedSubDependencies[linkedPackage.name] = linkedPackage;
+										}
+									})
+									
+								});
+						
+								for(var name in collectedSubDependencies){
+									subInfosPromises.push(_getInfoHelper(collectedSubDependencies[name], infos, updateDep, collectedDependencies))
+								}
+
+								return Promise.all(subInfosPromises);
+							})
+							
 
 							var mergedDeps = {};
 							updateSteps.push(function(){

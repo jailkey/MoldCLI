@@ -302,6 +302,14 @@ Seed({
 			},
 			__loadingBar : null,
 			loadingBar : function(text, time){
+				if(this.silent){
+					this.__loadingBar = {
+						stop : function(){},
+						text : function(){}
+					}
+
+					return this.__loadingBar;
+				}
 				var stop = false;
 				var time = time || 100;
 				var sprite = this.sprites().quat;

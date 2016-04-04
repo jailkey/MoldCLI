@@ -37,14 +37,18 @@ Seed({
 					var dep = dep || {};
 					seed.dependencies.forEach(function(seedName){
 						var dependedSeed = vm.Mold.Core.SeedManager.get(seedName);
+						
 						dep[dependedSeed.name] = {
+							hasLoadingError : dependedSeed.loadingError || false,
 							path : dependedSeed.path,
 							packageName : response.parameter.source[0].data.name,
 							packageVersion : response.parameter.source[0].data.version
 						}
 						dep = _getAllDependencies(vm, dependedSeed, response, dep);
 					});
+
 					dep[seed.name] = {
+						hasLoadingError : seed.loadingError || false,
 						path : seed.path,
 						packageName : response.parameter.source[0].data.name,
 						packageVersion : response.parameter.source[0].data.version
@@ -91,7 +95,8 @@ Seed({
 							var currentPackageName = response.parameter.source[0].data.name;
 							var waterfall = [];
 							var getRepoVM = new VM({
-								configPath : path
+								configPath : path,
+								disableDependencyErrors : true
 							});
 
 
@@ -166,10 +171,13 @@ Seed({
 														collected.linkedSeeds[seed.name] = { 
 															path : seed.path,
 															packageName : responsData.name,
-															packageVersion : responsData.version
+															packageVersion : responsData.version,
+															hasLoadingError : false
 														};
 													})
 												}
+
+
 
 												if(linkedDependencies.length){
 													var depWaterfall = [];
@@ -185,10 +193,32 @@ Seed({
 														})
 													});
 
+
 													Promise
 														.waterfall(depWaterfall)
 														.then(function(){
-															args.packageInfo = collected;
+															//filter dependedn seeds
+															var filterdCollection = {
+																currentPackage : collected.currentPackage,
+																linkedSeeds : {},
+																repositories : collected.repositories,
+																linkedPackages : collected.linkedPackages,
+																linkedNpmPackages : collected.linkedNpmPackages,
+																linkedNpmDependencies : collected.linkedNpmDependencies,
+																linkedSources : [],
+															}
+
+															for(var name in collected.linkedSeeds){
+																if(collected.linkedSeeds[name].packageName === currentPackageName){
+																	filterdCollection.linkedSeeds[name] = collected.linkedSeeds[name];
+																}
+															}
+
+															filterdCollection.linkedSources = collected.linkedSources.filter(function(entry){
+																return (entry.packageName === currentPackageName) ? true : false;
+															})
+
+															args.packageInfo = filterdCollection;
 															resolveDep(args);
 														})
 														.catch(rejectDep)

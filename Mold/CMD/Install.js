@@ -31,11 +31,11 @@ Seed({
 				'-p' : {
 					'alias' : '-path'
 				},
-				'--no-dependencies' : {
-					'description' : 'Install the seed without dependencies.'
+				'--without-sub-packages' : {
+					'description' : 'Install the seed without sub packages.'
 				},
-				'--nd' : {
-					'alias' : '--no-dependencies'
+				'--wsp' : {
+					'alias' : '--without-sub-packages'
 				},
 				'--without-git-ignore' : {
 					'description' : "If set no entrys will be added to the .gitignore"
@@ -45,10 +45,15 @@ Seed({
 				},
 				'--without-sources' : {
 					'description' : 'Installs the package without other sources.'
+				},
+				'--without-adding-dependencies' : {
+					'description' : 'If set the dependency will not added to mold.json'
 				}
 			},
 			code : function(args){
 				return new Promise(function(resolve, reject){
+					Helper = Helper.getInstance();
+					Helper.silent = args.conf.silent;
 					var loader = Helper.loadingBar("get package info ");
 					var _packageSources = {};
 					var _packageDep = {};
@@ -85,6 +90,16 @@ Seed({
 								reject(new Mold.Errors.CommandError("You can not install a package into it self!", "install"))
 								return;
 							}
+							if(
+								Mold.Core.Config.get("dependencies").find(function(entry){
+									return response.packageInfo.currentPackage.name === entry.name
+								})
+							){
+								loader.stop();
+								Helper.info("Package " + response.packageInfo.currentPackage.name + " is allready installed!").lb();
+								resolve(args)
+								return;
+							}
 							
 							//create repositorys
 							for(repoName in response.packageInfo.repositories){
@@ -103,15 +118,17 @@ Seed({
 									}
 								});
 
-								//return Promise.waterfall(packageDependencies);
-								//add only the curent dependency
-								return Command.createDependency({ 
-									'-name' : response.packageInfo.currentPackage.name,
-									'-path' : response.packageInfo.currentPackage.path,
-									'-version' : response.packageInfo.currentPackage.version,
-									'--silent' : true
-								})
-								
+								if(args.parameter['--without-adding-dependencies']){
+									return new Promise().resolve()
+								}else{
+									//add only the curent dependency
+									return Command.createDependency({ 
+										'-name' : response.packageInfo.currentPackage.name,
+										'-path' : response.packageInfo.currentPackage.path,
+										'-version' : response.packageInfo.currentPackage.version,
+										'--silent' : true
+									})
+								}
 							})
 
 							//install other sources
@@ -237,6 +254,36 @@ Seed({
 								}
 								return Promise.waterfall(setInfos)
 							})
+
+							//install linked depnedencies
+							if(!args.parameter['--without-sub-packages']){
+								installSteps.push(function(){
+									//filter double linked packages and self before
+									
+									var collectedPackes = {}
+									collectedPackes[response.packageInfo.currentPackage.name] = true;
+									response.packageInfo.linkedPackages = response.packageInfo.linkedPackages.filter(function(entry){
+										if(!collectedPackes[entry.name]){
+											collectedPackes[entry.name] = true;
+											return true;
+										}
+										return false;
+									})
+									var installLinkedPackages = [];
+									response.packageInfo.linkedPackages.forEach(function(entry){	
+										installLinkedPackages.push(function(){
+											var commandArgs = {
+												'-p' : entry.path,
+												'--without-adding-dependencies' : true,
+												'--silent' : true
+											}
+											loader.text("Install dependent package '" + entry.name + "'")
+											return Command.install(commandArgs)
+										})
+									})
+									return Promise.waterfall(installLinkedPackages);
+								});
+							}
 
 							
 							//execute all steps

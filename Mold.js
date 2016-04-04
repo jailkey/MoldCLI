@@ -1086,22 +1086,39 @@
 			 */
 			load : function(){
 				if(!this.isLoaded){
+					var that = this;
 					this.path = __Mold.Core.Pathes.getPathFromName(this.name);
-
 					var file = new __Mold.Core.File(this.path);
 					var promise = file.load();
 					var that = this;
+					return new Promise(function(resolve, reject){
+						promise
+							.then(function(data){
+								that.fileData = data
+								that.mapFileData();
+								resolve(that);
+							})
+							.catch(function(err){
+								try{
+									if(__Mold.Core.Config.get('disable-dependency-errors')){
+										
+										//if there is an error and disabling errors is active resolve seed
+										that.loadingError = true;
+										that.state = __Mold.Core.SeedStates.READY;
+										that._isCreatedPromise.resolve(that);
+										resolve(that);
+									
+									}else{
+										var error = new Error("Can not load seed: '" + that.path + "'! [" + that.name + "]" + __Mold.getInstanceDescription());
+										reject(error)
+										//throw error;
+									}
+								}catch(e){
+									reject(e)
+								}
+							})
 
-					promise
-						.then(function(data){
-							that.fileData = data;
-							that.mapFileData();
-						})
-						.fail(function(){
-							throw new Error("Can not load seed: '" + that.path + "'! [" + that.name + "]" + __Mold.getInstanceDescription());
-						})
-
-					return promise;
+					});
 				}
 			},
 
@@ -1207,6 +1224,9 @@
 			 * @return {promise} returns a promise which will be resolved if the seed is created
 			 */
 			create : function(){
+				if(this.loadingError){
+					return this._isCreatedPromise;
+				}
 				if(!this.fileData){
 					throw new Error("Can not created script without file data! [" + this.name + "]");
 				}
@@ -1254,6 +1274,9 @@
 			 * @return {[type]} [description]
 			 */
 			execute : function(){
+				if(this.loadingError){
+					return;
+				}
 				var typeHandler = __Mold.Core.SeedTypeManager.get(this.type);
 				if(!typeHandler){
 					throw new SeedError("SeedType '" + this.type + "' not found!", this.name);
@@ -1266,12 +1289,15 @@
 					var closure = "//" + this.name + "\n";
 					this._addedLines++;
 					for(var inject in this.injections){
-						closure += "	var " + inject + " = " + this.injections[inject] + "; \n" ;
-						this._addedLines++;
+						//check if injection has fileData if not somthing went wrong a the source could not be injected
+						if(!__Mold.Core.SeedManager.get(this.injections[inject] ).loadingError){
+							closure += "	var " + inject + " = " + this.injections[inject] + "; \n" ;
+							this._addedLines++;
+						}
 					}
 					closure += " return " + this.code.toString() + "\n";
 					closure += this.buildSourceMap();
-	
+
 					if(_isNodeJS){
 						try{
 							var sandbox = {
@@ -2136,6 +2162,7 @@
 				var configPath = __Mold.Core.Initializer.getParam('config-path') || this.get('config-path', _defaultType);
 				var configName = __Mold.Core.Initializer.getParam('config-name') || this.get('config-name', _defaultType);
 				var onlyOneConfig = __Mold.Core.Initializer.getParam('use-one-config') || false;
+				var disableDependencyErrors = __Mold.Core.Initializer.getParam('disable-dependency-errors') || false;
 
 				if(configPath !== "" && !configPath.endsWith("/")){
 					configPath += "/";
@@ -2143,6 +2170,7 @@
 
 				this.set('config-path', configPath);
 				this.set('config-name', configName)
+				this.set('disable-dependency-errors', disableDependencyErrors);
 
 				var localPath = configPath + configName;
 				var promise = this.loadConfig(localPath);
@@ -2228,7 +2256,7 @@
 	}()
 
 	Mold.prototype.Core.Initializer = function(){
-		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path', 'root-path', 'use-one-config'];
+		var _params = ['config-name', 'config-path', 'global-config-name', 'global-config-path', 'root-path', 'use-one-config', 'disable-dependency-errors'];
 		var _availableParams = {};
 		var _cliCommands= [];
 
@@ -2465,6 +2493,10 @@
 			 */
 			exec : function(seed){
 				return new __Mold.Core.Promise(function(resolve){
+					if(seed.loadingError){
+						resolve(seed);
+						return;
+					}
 					var i = 0;
 					var next = function(){
 						var process = _preprocessors[i] || null;
@@ -3100,7 +3132,7 @@
 				
 			})
 			.on(this.Core.SeedStates.PENDING, function(seed, done){
-				//console.log("do PENDING", seed.name);
+			//	console.log("do PENDING", seed.name);
 				__Mold.Core.DependencyManager.find(seed);
 				seed.checkDependencies().then(function(){
 					done();
@@ -3121,7 +3153,7 @@
 				done();
 			})
 			.on(that.Core.SeedStates.READY, function(seed, done){
-				//console.log("SEED READY", seed.name)
+			//	console.log("SEED READY", seed.name)
 
 				done();
 			})

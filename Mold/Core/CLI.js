@@ -19,7 +19,8 @@ Seed({
 
 		var _loadedCommandSeeds = {};
 		var fs = require('fs');
-		var _isLoaded = new Promise();
+		
+		var _isLoaded = new Mold.Core.Promise();
 
 		if(!Mold.isNodeJS){
 			throw Error("You can use Mold.Core.CLI only with NodeJS!");

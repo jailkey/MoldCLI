@@ -87,7 +87,7 @@ Seed({
 								//compare with other packages and get the differenz
 								diffSteps.push(function(){
 									var compareSteps = [];
-									dependencies.forEach(function(currentDep){
+									others.forEach(function(currentDep){
 										if(currentDep.name === selected.name){
 											return false;
 										}
@@ -114,6 +114,7 @@ Seed({
 															packageInfoDiff.dependencies = packageInfoDiff.dependencies.filter(function(selected){
 																if(selectedPackage && selectedPackage.dependencies){
 																	for(var i = 0; i < selectedPackage.dependencies.length; i++){
+
 																		if(selected.name === selectedPackage.dependencies[i].name){
 																			return false;
 																		}
