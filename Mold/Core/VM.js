@@ -41,12 +41,14 @@ Seed({
 			this.confPath = conf.configPath || '',
 			this.confName = conf.configName || 'mold.json'
 			this.disableDependencyErrors = conf.disableDependencyErrors || false
+			this.stopSeedExecuting = conf.stopSeedExecuting || false
 
 			this.sandbox.process.argv = [
 				'config-path',  this.confPath,
 				'config-name', this.confName,
 				'use-one-config', true,
-				'disable-dependency-errors', this.disableDependencyErrors
+				'disable-dependency-errors', this.disableDependencyErrors,
+				'stop-seed-executing', this.stopSeedExecuting
 			];
 
 			this.vm = require('vm');

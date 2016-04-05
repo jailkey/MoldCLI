@@ -3,11 +3,15 @@
 		"Mold": {
 			"sources": [
 				{
-					"path": "Mold/Core/Version.js",
+					"path": "Mold/Core/Validation.js",
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/Validation.js",
+					"path": "Mold/Core/Sequence.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/__.js",
 					"type": "file"
 				},
 				{
@@ -19,11 +23,7 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/Sequence.js",
-					"type": "file"
-				},
-				{
-					"path": "Mold/Core/__.js",
+					"path": "Mold/Core/Version.js",
 					"type": "file"
 				},
 				{

@@ -7,6 +7,9 @@
 	"mainSeeds": [
 		"Mold.Core.CLI"
 	],
+	"seeds": [
+		"Mold.Core.Command"
+	],
 	"dependencies": [
 		{
 			"name": "Mold",

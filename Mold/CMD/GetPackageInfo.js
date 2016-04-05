@@ -82,22 +82,15 @@ Seed({
 								linkedSources : [],
 							}
 
-							/*
-							if(response.parameter.source[0].data.name === Mold.Core.Config.get('name')){
-								collected.currentPackage = null;
-								args.packageInfo = collected;
-								resolve(args);
-								return;
-							}*/
-
-
 							var path =  args.parameter['-path'].value;
 							var currentPath = path;
 							var currentPackageName = response.parameter.source[0].data.name;
 							var waterfall = [];
+
 							var getRepoVM = new VM({
 								configPath : path,
-								disableDependencyErrors : true
+								disableDependencyErrors : true,
+								stopSeedExecuting : true
 							});
 
 
