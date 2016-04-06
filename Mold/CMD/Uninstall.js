@@ -9,7 +9,7 @@ Seed({
 			{ File : 'Mold.Core.File' },
 			{ Logger : 'Mold.Core.Logger' },
 			'Mold.CMD.GetMoldJson',
-			{ PackageInfo : 'Mold.Core.PackageInfo' }
+			{ InstallInfo : 'Mold.Core.InstallInfo' }
 		]
 	},
 	function(){
@@ -79,7 +79,7 @@ Seed({
 								//get current
 								diffSteps.push(function(){
 									
-									return PackageInfo.get(name, true).then(function(packageInfo){
+									return InstallInfo.get(name, true).then(function(packageInfo){
 										packageInfoDiff = packageInfo || {};
 									});
 								});
@@ -94,7 +94,7 @@ Seed({
 										compareSteps.push(function(){
 											var currentName = currentDep.name;
 											return function(){
-												return PackageInfo
+												return InstallInfo
 														.get(currentName)
 														.then(function(selectedPackage){
 
@@ -155,7 +155,7 @@ Seed({
 									var uninstalls = [];
 									if(packageInfoDiff.dependencies){
 										packageInfoDiff.dependencies.forEach(function(dep){
-											uninstalls.push(function() { return PackageInfo.remove(dep.name) });
+											uninstalls.push(function() { return InstallInfo.remove(dep.name) });
 										});
 									}
 									return Promise.waterfall(uninstalls);
@@ -163,7 +163,7 @@ Seed({
 
 								//remove from package info
 								diffSteps.push(function(){
-									return PackageInfo.remove(selected.name);
+									return InstallInfo.remove(selected.name);
 								})
 
 								//remove from mold.json (if defined)

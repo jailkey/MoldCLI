@@ -13,7 +13,7 @@ Seed({
 			{ Helper : 'Mold.Core.CLIHelper' },
 			{ NPM : 'Mold.Core.NPM' },
 			{ File : 'Mold.Core.File' },
-			{ PackageInfo : 'Mold.Core.PackageInfo' },
+			{ InstallInfo : 'Mold.Core.InstallInfo' },
 			'Mold.CMD.GetMoldJson',
 			'Mold.CMD.CopySeed'
 		]
@@ -262,7 +262,7 @@ Seed({
 										setInfos.push(function(){
 											var pckName = packageName;
 											var pSource =  _packageSources[packageName];
-											return function() { return PackageInfo.set(pckName, { 
+											return function() { return InstallInfo.set(pckName, { 
 												sources : pSource,
 												dependencies : _packageDep[pckName] || []
 											}) }
@@ -291,8 +291,20 @@ Seed({
 												var commandArgs = {
 													'-p' : entry.path,
 													'--without-adding-dependencies' : true,
-													'--silent' : true
+													'--silent' : true,
 												}
+
+												//reset command parameter
+												if(args.parameter['--without-git-ignore']){
+													commandArgs['--without-git-ignore'] = true;
+												}
+												if(args.parameter['--without-npm']){
+													commandArgs['--without-npm'] = true;
+												}
+												if(args.parameter['--without-sources']){
+													commandArgs['--without-sources'] = true;
+												}
+
 												loader.text("Install dependent package '" + entry.name + "'")
 												return Command.install(commandArgs)
 											})

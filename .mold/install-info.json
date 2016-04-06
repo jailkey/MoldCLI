@@ -1,0 +1,89 @@
+{
+	"packages": {
+		"Mold": {
+			"sources": [
+				{
+					"path": "Mold.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Validation.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/NPM.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Sequence.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/__.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/VM.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Version.js",
+					"type": "file"
+				}
+			],
+			"dependencies": []
+		},
+		"Mold.Core.Test": {
+			"sources": [
+				{
+					"path": "Mold/Core/Test/CLIReporter.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/CMD/Test.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Test/Tester.js",
+					"type": "file"
+				}
+			],
+			"dependencies": [
+				{
+					"name": "Mold",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
+					"version": "0.2.3"
+				},
+				{
+					"name": "Mold.Core.Event",
+					"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.Event/master/",
+					"version": "0.0.1"
+				},
+				{
+					"name": "Mold.Core.CLI",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldCLI/master/",
+					"version": "0.2.2"
+				}
+			]
+		},
+		"Mold.Core.Event": {
+			"sources": [
+				{
+					"path": "Mold/Core/EventStore.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Event.js",
+					"type": "file"
+				}
+			],
+			"dependencies": [
+				{
+					"name": "Mold",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
+					"version": "0.2.3"
+				}
+			]
+		}
+	}
+}

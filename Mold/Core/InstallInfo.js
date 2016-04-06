@@ -9,15 +9,15 @@ Seed({
 	},
 	function(module){
 
-		var PackageInfo = function(){
+		var InstallInfo = function(){
 			this.infoDir = ".mold/";
-			this.packageInfoFile = "package-info.json";
+			this.installInfoFile = "install-info.json";
 
 		}
 
-		PackageInfo.prototype = {
+		InstallInfo.prototype = {
 			getFile : function(){
-				var file = new File(this.infoDir + this.packageInfoFile, "json");
+				var file = new File(this.infoDir + this.installInfoFile, "json");
 				return file.load();
 			},
 			get : function(packageName, recursive){
@@ -87,7 +87,7 @@ Seed({
 						reject(new Error("Package name not given! [Mold.Core.PackageInfo]"));
 						return;
 					}
-					var path = this.infoDir + this.packageInfoFile;
+					var path = this.infoDir + this.installInfoFile;
 					Command.createPath({ '-p' : path, '--silent' : true})
 						.then(function(){
 							var file = new File(path, "json");
@@ -114,7 +114,7 @@ Seed({
 			},
 			setPackages : function(data){
 				return new Promise(function(resolve, reject){
-					var path = this.infoDir + this.packageInfoFile;
+					var path = this.infoDir + this.installInfoFile;
 					Command.createPath({ '-p' : path, '--silent' : true})
 						.then(function(){
 							var file = new File(path, "json");
@@ -128,7 +128,7 @@ Seed({
 			},
 			remove : function(packageName){
 				if(!packageName){
-					reject(new Error("Package name not given! [Mold.Core.PackageInfo]"));
+					reject(new Error("Package name not given! [Mold.Core.InstallInfo]"));
 					return;
 				}
 				return new Promise(function(resolve, reject){
@@ -151,6 +151,6 @@ Seed({
 		}
 
 
-		module.exports = new PackageInfo();	
+		module.exports = new InstallInfo();	
 	}
 )

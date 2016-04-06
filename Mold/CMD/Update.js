@@ -11,7 +11,7 @@ Seed({
 			'Mold.CMD.GetMoldJson',
 			'Mold.CMD.CopySeed',
 			'Mold.CMD.GetPackageInfo',
-			{ PackageInfo : 'Mold.Core.PackageInfo' }
+			{ InstallInfo : 'Mold.Core.InstallInfo' }
 		]
 	},
 	function(){
@@ -37,7 +37,7 @@ Seed({
 					return new Promise(function(resolveDep, rejectDep){
 						//get all infos
 						Command.getPackageInfo({ '-p' : dep.path }).then(function(info){
-							packageInfo = info.packageInfo;
+							var packageInfo = info.packageInfo;
 							var result = Version.compare(packageInfo.currentPackage.version, dep.version);
 							collectedDependencies[packageInfo.currentPackage.name] = true;
 							if(result === "bigger" || force){
@@ -242,7 +242,7 @@ Seed({
 									setPackageInfos.push(function(){
 										var currentName = currentPackageName;
 										return function() {
-											return PackageInfo.set(currentName, collectedPackageInfos[currentName]);
+											return InstallInfo.set(currentName, collectedPackageInfos[currentName]);
 										}
 									}());
 								}
