@@ -102,6 +102,7 @@
 				require : require,
 				__dirname : __dirname,
 				setTimeout : setTimeout,
+				clearTimeout : clearTimeout,
 				process : process,
 				Buffer : Buffer
 			}

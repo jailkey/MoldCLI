@@ -8,7 +8,8 @@ Seed({
 		platform : 'node',
 		include : [
 			{ Promise : "Mold.Core.Promise" },
-			"Mold.Core.CLIForm"
+			"Mold.Core.CLIForm",
+			{ LoadingBar : "Mold.Core.CLILoadingBar"}
 		]
 	},
 	function(){
@@ -297,106 +298,9 @@ Seed({
 				});
 			},
 
-			sprites :  function(){
-				var that = this;
-				var cQ = this.COLOR_RED + "◼" + this.COLOR_RESET;
+			loadingBar : LoadingBar,
 
-				return {
 
-					quat : [
-						cQ + " ▭ ▭ ▭ ▭ ▭ ▭ ▭ ▭",
-						"▭ " + cQ + " ▭ ▭ ▭ ▭ ▭ ▭ ▭",
-						"▭ ▭ " + cQ + " ▭ ▭ ▭ ▭ ▭ ▭",
-						"▭ ▭ ▭ " + cQ + " ▭ ▭ ▭ ▭ ▭",
-						"▭ ▭ ▭ ▭ " + cQ + " ▭ ▭ ▭ ▭",
-						"▭ ▭ ▭ ▭ ▭ " + cQ + " ▭ ▭ ▭",
-						"▭ ▭ ▭ ▭ ▭ ▭ " + cQ + " ▭ ▭",
-						"▭ ▭ ▭ ▭ ▭ ▭ ▭ " + cQ + " ▭",
-						"▭ ▭ ▭ ▭ ▭ ▭ ▭ ▭ " + cQ,
-					]
-				}
-				
-				
-			},
-			__loadingBar : null,
-			loadingBar : function(text, silent, time){
-				if(this.silent || silent){
-
-					return {
-						stop : function(){},
-						start : function(){},
-						text : function(){}
-					}
-				}
-				var stop = false;
-				var time = time || 100;
-				var sprite = this.sprites().quat;
-				var _text = text;
-				var that = this;
-
-				var next = function(count){
-					if(stop){
-						return;
-					}
-
-					count = (sprite.length === count) ? 0 : count;
-					
-					process.stdout.cursorTo(0);
-					process.stdout.write(sprite[count] + "   " + _text);
-					
-					setTimeout(function(){ next(++count)}, time);
-				}
-
-				next(0);
-
-				this.__loadingBar = {
-					stop : function(text, silent){
-						if(silent){
-							stop = true;
-							return;
-						}
-						process.stdout.cursorTo(0);
-						if(text){
-							var old = sprite[0] + "   " + _text;
-							if(text.length < old.length){
-								var spaceLength = old.length - text.length;
-								text += " ".repeat(spaceLength);
-							}
-							process.stdout.write(text);
-						}else{
-							process.stdout.write(" ".repeat(sprite[0].length) + " ".repeat( _text.length));
-						}
-						process.stdout.cursorTo(0);
-						//process.stdout.write("\n")
-						stop = true;
-					},
-					start : function(text, silent){
-						if(silent){
-							return;
-						}
-						stop = false;
-						if(text){
-							this.text(text);
-						}
-						next(0);
-					},
-					text : function(text, silent){
-						if(silent){
-							return;
-						}
-						var space = "";
-						if(_text.length > text.length){
-							var space = " ".repeat(_text.length);
-							process.stdout.cursorTo(0);
-							process.stdout.write(sprite[0] + "   " + space);
-							
-						}
-						_text = text;
-					}
-				}
-
-				return this.__loadingBar;
-			},
 		/**
 		 * @description colors and symboles you could use to format your cli output
 		 * @type {String}

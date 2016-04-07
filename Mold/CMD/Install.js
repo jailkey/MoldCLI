@@ -52,8 +52,8 @@ Seed({
 			},
 			code : function(args){
 				return new Promise(function(resolve, reject){
-			
-					var loader = Helper.loadingBar("get package info ", args.conf.silent);
+					
+					var loader = Helper.loadingBar.start("get package info ", args.conf.silent);
 					var _packageSources = {};
 					var _packageDep = {};
 					var _gitIgnorSources = [];
@@ -80,7 +80,6 @@ Seed({
 					}
 
 					Command.getMoldJson({'-p' : ''}).then(function(moldJson){
-						
 						if(!moldJson.parameter.source){
 							throw new Error("local mold.json not found!");
 						}
@@ -93,7 +92,6 @@ Seed({
 								var repoPromis = new Promise();
 								var repos = [];
 								var installSteps = [];
-							
 								//if it is null the user tried to install a package into itself
 								if(response.packageInfo.currentPackage === null || response.packageInfo.currentPackage.name === currentAppName){
 									if(!args.conf.silent){
@@ -136,7 +134,7 @@ Seed({
 													sourcePromises.push(function() { return Command.createPath({ '-path' : source.path, '--silent' : true }) })
 												}else if(source.type === 'file'){
 													if(Mold.Core.Pathes.exists(source.path, 'file')){
-														sourcePromises.push(function() { 
+														sourcePromises.push(function() {
 															Helper.warn("Conflict detected  " + newSeedPath + " currently exists!").lb();
 															return Command.merge({'-l' : source.path, '-r' : source.filePath}) 
 														});
@@ -201,12 +199,13 @@ Seed({
 													
 													return function(){
 														if(Mold.Core.Pathes.exists(newSeedPath, 'file')){
-															loader.stop(' ', args.conf.silent);
-															Helper.warn("Conflict detected  " + newSeedPath + " currently exists!").lb();
+															loader.stop(' ');
+															Helper.lb().warn("Conflict detected  " + newSeedPath + " currently exists!");
 															return Command
 																		.merge({ '-l' : newSeedPath, '-r' : seedPathCopy})
 																		.then(function(){
 																			_collectSource(packageName, newSeedPath, 'file');
+																			Helper.lb();
 																			loader.start("conflict solved!")
 																		})
 

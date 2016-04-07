@@ -182,8 +182,9 @@ Seed({
 					}
 					return;
 				}else{
-					CLIHelper.stopAllInstances();
 					Logger.error(e);
+					CLIHelper.loadingBar.stop();
+					
 				}
 			})
 

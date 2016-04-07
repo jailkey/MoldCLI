@@ -31,9 +31,7 @@ Seed({
 				}
 			},
 			code : function(args){
-				Helper = Helper.getInstance();
-				Helper.silent = args.conf.silent;
-
+			
 				return new Promise(function(resolve, reject){
 					var local = args.parameter['-local'].value;
 					var remote = args.parameter['-remote'].value;

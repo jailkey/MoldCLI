@@ -57,7 +57,6 @@ Seed({
 				//_that.trigger("input", { data : data} );
 			}
 
-			_cli.write("\n");
 			_cli.read(field.label + " ", function(data, reader){
 				readFunc(data, reader);
 			}, _cli.completer[field.input.type] || _cli.completer.default);

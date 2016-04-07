@@ -82,7 +82,9 @@ Seed({
 					});
 
 					var isEvent = !(i % 2);
-					var space = " ".repeat(process.stdout.columns - lines[i].length - 8);
+					var spaceCount = process.stdout.columns - lines[i].length - 8;
+					spaceCount = (spaceCount < 0) ? 0 : spaceCount;
+					var space = " ".repeat(spaceCount);
 					var lineColor = (!(i % 2)) ? Helper.BGCOLOR_DARKER_GREY : Helper.BGCOLOR_BLACK;
 
 					Helper.write(lineColor);
@@ -101,7 +103,7 @@ Seed({
 				Helper.write(Helper.BGCOLOR_RESET).lb();
 			})
 			.catch(function(err){
-				console.log("err", err)
+				console.log("Logger Error", err.stack)
 			})
 
 			return promise;
