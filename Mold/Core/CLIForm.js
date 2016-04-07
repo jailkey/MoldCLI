@@ -123,6 +123,9 @@ Seed({
 					_promise.resolve(_collected);
 					return false;
 				}
+			},
+			close : function(){
+				_cli.close();
 			}
 		}
 	}

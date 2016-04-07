@@ -91,7 +91,6 @@ Seed({
 
 						Command.getPackageInfo({ '-p' : args.parameter['-path']})
 							.then(function(response){
-								
 								var repoPromis = new Promise();
 								var repos = [];
 								var installSteps = [];
@@ -123,52 +122,36 @@ Seed({
 									repos.push(Command.createRepo({ '-name' : repoName, '--silent' : true }));
 								}
 
-								//add dependencies
-								installSteps.push(function(){
-									var packageDependencies = [];
-									response.packageInfo.linkedPackages.forEach(function(currentPackage){
-										loader.text("add dependency " + currentPackage.name)
-										if(currentPackage.dependencies){
-											_packageDep[currentPackage.name] = _packageDep[currentPackage.name] || [];
-											_packageDep[currentPackage.name] = _packageDep[currentPackage.name].concat(currentPackage.dependencies);
-										}
-									});
-
-									if(args.parameter['--without-adding-dependencies']){
-										return new Promise().resolve()
-									}else{
-										//add only the curent dependency
-										return Command.createDependency({ 
-											'-name' : response.packageInfo.currentPackage.name,
-											'-path' : response.packageInfo.currentPackage.path,
-											'-version' : response.packageInfo.currentPackage.version,
-											'--silent' : true
-										})
-									}
-								})
-
+								
 								//install other sources
 								if(!args.parameter['--without-sources']){
 									var sourcePromises = [];
 									installSteps.push(function(){
 										response.packageInfo.linkedSources.forEach(function(source){
+
 											if(!_isInstalledPackage(source.packageName)){
 												loader.text("add source " + source.path)
 												if(source.type === 'dir'){
 													_collectSource(source.packageName, source.path, 'dir');
 													//create directory
-													sourcePromises.push(Command.createPath({ '-path' : source.path, '--silent' : true }))
+													sourcePromises.push(function() { return Command.createPath({ '-path' : source.path, '--silent' : true }) })
 												}else if(source.type === 'file'){
-
-													var file = new File(source.filePath);
-													_collectSource(source.packageName, source.path, 'file')
-													_addToGitIgnor(source.path);
-													sourcePromises.push(file.copy(source.path))
+													if(Mold.Core.Pathes.exists(source.path, 'file')){
+														sourcePromises.push(function() { 
+															Helper.warn("Conflict detected  " + newSeedPath + " currently exists!").lb();
+															return Command.merge({'-l' : source.path, '-r' : source.filePath}) 
+														});
+													}else{
+														var file = new File(source.filePath);
+														_collectSource(source.packageName, source.path, 'file')
+														_addToGitIgnor(source.path);
+														sourcePromises.push(function(){ return file.copy(source.path) })
+													}
 												}
 											}
 												
 										});
-										return Promise.all(sourcePromises)
+										return Promise.waterfall(sourcePromises)
 									})
 								
 								}
@@ -205,32 +188,76 @@ Seed({
 							
 									var seeds = [];
 									var outputPromise = null;
-
 									for(var seedName in response.packageInfo.linkedSeeds){
 										var seedPath = response.packageInfo.linkedSeeds[seedName].path;
 										if(seedPath){
 											if(!_isInstalledPackage(response.packageInfo.linkedSeeds[seedName].packageName)){
 												//copy seeds
 												seeds.push(function(){
+													//copy needed from the loop
+													var seedNameCopy = seedName;
 													var packageName = response.packageInfo.linkedSeeds[seedName].packageName;
-													return Command.copySeed({ 
-														'-name' : seedName,
-														'-path' : seedPath,
-														'--silent' : true
-													})
-													.then(function(seedArgs){
-														loader.text("copy seed " + seedArgs.parameter['-name'].value);
-														_collectSource(packageName, seedArgs.parameter['-target'], 'file');
-														_addToGitIgnor('/' + seedArgs.parameter['-target']);
-													})
+													var newSeedPath = Mold.Core.Pathes.getPathFromName(seedNameCopy, true);
+													var seedPathCopy = seedPath;
+													
+													return function(){
+														
+														if(Mold.Core.Pathes.exists(newSeedPath, 'file')){
+															loader.stop();
+															Helper.warn("Conflict detected  " + newSeedPath + " currently exists!").lb();
+															return Command
+																		.merge({ '-l' : newSeedPath, '-r' : seedPathCopy})
+																		.then(function(){
+																			_collectSource(packageName, newSeedPath, 'file');
+																			loader.start("conflict solved!")
+																		})
+
+														}else{
+															return Command.copySeed({ 
+																'-name' : seedNameCopy,
+																'-path' : seedPathCopy,
+																'--silent' : true
+															})
+															.then(function(seedArgs){
+																loader.text("copy seed " + seedArgs.parameter['-name'].value);
+																_collectSource(packageName, seedArgs.parameter['-target'], 'file');
+																_addToGitIgnor('/' + seedArgs.parameter['-target']);
+															})
+														}
+													}
 												}());
 											}
 											
 										}
 									}
 
-									return Promise.all(seeds);
+									return Promise.waterfall(seeds);
 								});
+
+								//add dependencies
+								installSteps.push(function(){
+									var packageDependencies = [];
+									response.packageInfo.linkedPackages.forEach(function(currentPackage){
+										loader.text("add dependency " + currentPackage.name)
+										if(currentPackage.dependencies){
+											_packageDep[currentPackage.name] = _packageDep[currentPackage.name] || [];
+											_packageDep[currentPackage.name] = _packageDep[currentPackage.name].concat(currentPackage.dependencies);
+										}
+									});
+
+									if(args.parameter['--without-adding-dependencies']){
+										return new Promise().resolve()
+									}else{
+										//add only the curent dependency
+										return Command.createDependency({ 
+											'-name' : response.packageInfo.currentPackage.name,
+											'-path' : response.packageInfo.currentPackage.path,
+											'-version' : response.packageInfo.currentPackage.version,
+											'--silent' : true
+										})
+									}
+								})
+
 
 								//add to git ignore
 								installSteps.push(function(){

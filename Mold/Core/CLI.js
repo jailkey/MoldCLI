@@ -39,7 +39,7 @@ Seed({
 					var loadingSeeds = [];
 					dirValue.forEach(function(entry){
 						var seedName = name + entry.replace(".js", "");
-						var seedPath = path + entry;
+						var seedPath = path + entry.replace(".js", "") + ".js";
 						if(Mold.Core.Pathes.exists(seedPath, 'file') && !_loadedCommandSeeds[seedName]){
 							loadingSeeds.push(Mold.load(seedName))
 						}

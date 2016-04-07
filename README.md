@@ -22,10 +22,10 @@ For example if you will create a new project/package you can do it with:
 if you want to add a package to your current project use:
 
 ```
-	mold install -name Mold.Lib.Template
+	mold install -path http://path-to-your-mold-package
 ```
 
 Use ```--help``` to  get info about a command.
 
-For more details take a look into the api docs.
+
  

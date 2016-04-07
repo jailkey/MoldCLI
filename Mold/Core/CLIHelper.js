@@ -119,6 +119,13 @@ Seed({
 				
 				return this;
 			},
+
+			close : function(){
+				if(_reader){
+					_reader.close();
+				}
+				return this;
+			},
 		/**
 		 * @method  createForm 
 		 * @description creates a cli form
@@ -305,6 +312,7 @@ Seed({
 				if(this.silent){
 					this.__loadingBar = {
 						stop : function(){},
+						start : function(){},
 						text : function(){}
 					}
 
@@ -321,9 +329,11 @@ Seed({
 					}
 
 					count = (sprite.length === count) ? 0 : count;
+					
 					process.stdout.cursorTo(0);
 					process.stdout.write(sprite[count] + "   " + _text);
-					setTimeout(function(){ next(++count) }, time);
+					
+					setTimeout(function(){ next(++count)}, time);
 				}
 
 				next(0);
@@ -343,6 +353,13 @@ Seed({
 						}
 						process.stdout.write("\n")
 						stop = true;
+					},
+					start : function(text){
+						stop = false;
+						if(text){
+							this.text(text);
+						}
+						next(0);
 					},
 					text : function(text){
 						var space = "";

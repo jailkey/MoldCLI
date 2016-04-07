@@ -27,6 +27,9 @@ Seed({
 				},
 				'--nd' : {
 					'alias' : '--no-dependencies'
+				},
+				'-collected-depedencies' :{
+					'description' : 'A list of dependencies which will not install, used to avoid endless recusion'
 				}
 
 			},
@@ -71,7 +74,8 @@ Seed({
 								throw new Error("Source is not defined")
 							}
 
-							
+							var collectedDepedencies = (args.parameter['-collected-depedencies']) ? args.parameter['-collected-depedencies'].value : [];
+
 							var collected = {
 								currentPackage : response.parameter.source[0].data,
 								linkedSeeds : {},
@@ -83,6 +87,7 @@ Seed({
 							}
 
 							var path =  args.parameter['-path'].value;
+							collectedDepedencies.push(path);
 							var currentPath = path;
 							var currentPackageName = response.parameter.source[0].data.name;
 							var waterfall = [];
@@ -179,14 +184,18 @@ Seed({
 													var depWaterfall = [];
 													linkedDependencies.forEach(function(currentDep){
 														var packageInfoPath = (Mold.Core.Pathes.isHttp(currentDep.path)) ? currentDep.path : currentPath + currentDep.path;
-														depWaterfall.push(function(){
-															return Command
-																		.execute('get-package-info', { '-p' : packageInfoPath })
-																		.then(function(foundInfo){
-																			foundInfo.packageInfo.linkedSeeds = _addCurrentVersion(foundInfo.packageInfo.linkedSeeds, currentDep.currentVersion)
-																			collected = Mold.merge(collected, foundInfo.packageInfo, { concatArrays : true, without : [ 'currentPackage'] });
-																		});
-														})
+														//collect dependencies to avoid recusions
+														if(!~collectedDepedencies.indexOf(packageInfoPath)){
+															collectedDepedencies.push(packageInfoPath);
+															depWaterfall.push(function(){
+																return Command
+																			.execute('get-package-info', { '-p' : packageInfoPath, '-collected-depedencies' : collectedDepedencies})
+																			.then(function(foundInfo){
+																				foundInfo.packageInfo.linkedSeeds = _addCurrentVersion(foundInfo.packageInfo.linkedSeeds, currentDep.currentVersion)
+																				collected = Mold.merge(collected, foundInfo.packageInfo, { concatArrays : true, without : [ 'currentPackage'] });
+																			});
+															})
+														}
 													});
 
 
