@@ -125,7 +125,7 @@ Seed({
 				}
 			},
 			close : function(){
-				_cli.close();
+				_cli.allInstances('close');
 			}
 		}
 	}

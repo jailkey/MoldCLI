@@ -185,13 +185,13 @@ Seed({
 
 								//copy seeds
 								installSteps.push(function(){
-							
 									var seeds = [];
 									var outputPromise = null;
 									for(var seedName in response.packageInfo.linkedSeeds){
 										var seedPath = response.packageInfo.linkedSeeds[seedName].path;
 										if(seedPath){
 											if(!_isInstalledPackage(response.packageInfo.linkedSeeds[seedName].packageName)){
+												
 												//copy seeds
 												seeds.push(function(){
 													//copy needed from the loop
@@ -201,9 +201,8 @@ Seed({
 													var seedPathCopy = seedPath;
 													
 													return function(){
-														
 														if(Mold.Core.Pathes.exists(newSeedPath, 'file')){
-															loader.stop();
+															loader.stop(' ');
 															Helper.warn("Conflict detected  " + newSeedPath + " currently exists!").lb();
 															return Command
 																		.merge({ '-l' : newSeedPath, '-r' : seedPathCopy})

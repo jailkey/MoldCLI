@@ -35,16 +35,24 @@ Seed({
 				config = config || {};
 				var instance = Object.create(this);
 				instance.silent = config.silent;
+				_instances.push(instance);
 				return instance;
 			},
 
 			silent : false,
 
-			stopAllInstances : function(){
+			allLoader : function(method, args, current){
 				_instances.forEach(function(instance){
-					if(instance.__loadingBar){
-						instance.__loadingBar.stop(" ");
+					if(instance.__loadingBar && current !== instance.__loadingBar){
+						instance.__loadingBar[method].apply(this, args);
 					}
+				})
+			},
+
+			allInstances : function(method, args){
+				args = args || [];
+				_instances.forEach(function(instance){
+					instance[method].apply(this, args)
 				})
 			},
 		/**
@@ -322,6 +330,7 @@ Seed({
 				var time = time || 100;
 				var sprite = this.sprites().quat;
 				var _text = text;
+				var that = this;
 
 				var next = function(count){
 					if(stop){
@@ -340,6 +349,7 @@ Seed({
 
 				this.__loadingBar = {
 					stop : function(text){
+						that.allLoader('stop', [' '], this);
 						process.stdout.cursorTo(0);
 						if(text){
 							var old = sprite[0] + "   " + _text;
