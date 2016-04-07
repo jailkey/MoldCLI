@@ -180,6 +180,8 @@ Seed({
 									return repoPromis.all(repos)
 								})
 
+								
+
 								//copy seeds
 								installSteps.push(function(){
 									var seeds = [];
@@ -299,41 +301,52 @@ Seed({
 								if(!args.parameter['--without-sub-packages']){
 									installSteps.push(function(){
 										//filter double linked packages and self before
-										
-										var collectedPackes = {}
-										collectedPackes[response.packageInfo.currentPackage.name] = true;
-										response.packageInfo.linkedPackages = response.packageInfo.linkedPackages.filter(function(entry){
-											if(!collectedPackes[entry.name]){
-												collectedPackes[entry.name] = true;
-												return true;
-											}
-											return false;
-										})
-										var installLinkedPackages = [];
-										response.packageInfo.linkedPackages.forEach(function(entry){	
-											installLinkedPackages.push(function(){
-												var commandArgs = {
-													'-p' : entry.path,
-													'--without-adding-dependencies' : true,
-													'--silent' : true,
+										return new Promise(function(resolveSub, rejectSub){
+											var collectedPackes = {}
+											collectedPackes[response.packageInfo.currentPackage.name] = true;
+											response.packageInfo.linkedPackages = response.packageInfo.linkedPackages.filter(function(entry){
+												if(!collectedPackes[entry.name]){
+													collectedPackes[entry.name] = true;
+													return true;
 												}
-
-												//reset command parameter
-												if(args.parameter['--without-git-ignore']){
-													commandArgs['--without-git-ignore'] = true;
-												}
-												if(args.parameter['--without-npm']){
-													commandArgs['--without-npm'] = true;
-												}
-												if(args.parameter['--without-sources']){
-													commandArgs['--without-sources'] = true;
-												}
-
-												loader.text("Install dependent package '" + entry.name + "'", args.conf.silent)
-												return Command.install(commandArgs)
+												return false;
 											})
+											var installLinkedPackages = [];
+											//get installation info to match if a package is installed
+											
+											InstallInfo.getFile().then(function(infoData){
+												response.packageInfo.linkedPackages.forEach(function(entry){
+													//check if the package is currently installed
+													var info = InstallInfo.get(entry.name);
+													if(infoData.packages[entry.name]){
+														loader.text("skip " + entry.name + ", package is currently installed.")
+													}else{
+														installLinkedPackages.push(function(){
+															var commandArgs = {
+																'-p' : entry.path,
+																'--without-adding-dependencies' : true,
+																'--silent' : true,
+															}
+
+															//reset command parameter
+															if(args.parameter['--without-git-ignore']){
+																commandArgs['--without-git-ignore'] = true;
+															}
+															if(args.parameter['--without-npm']){
+																commandArgs['--without-npm'] = true;
+															}
+															if(args.parameter['--without-sources']){
+																commandArgs['--without-sources'] = true;
+															}
+
+															loader.text("Install dependent package '" + entry.name + "'", args.conf.silent)
+															return Command.install(commandArgs)
+														})
+													}
+												})
+												return Promise.waterfall(installLinkedPackages).then(resolveSub).catch(rejectSub);
+											}).catch(rejectSub);
 										})
-										return Promise.waterfall(installLinkedPackages);
 									});
 								}
 

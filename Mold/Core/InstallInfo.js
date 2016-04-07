@@ -20,8 +20,9 @@ Seed({
 				var file = new File(this.infoDir + this.installInfoFile, "json");
 				return file.load();
 			},
-			get : function(packageName, recursive){
+			get : function(packageName, recursive, temp){
 				var that = this;
+				temp = temp || {};
 				return new Promise(function(resolve, reject){
 					
 					this.getFile()
@@ -32,7 +33,11 @@ Seed({
 										var depSteps = [];
 										for(var i = 0; i < data.packages[packageName].dependencies.length; i++){
 											var currentDep = data.packages[packageName].dependencies[i];
-											depSteps.push(that.get(currentDep.name, recursive))
+											//use temp object to avoid endless recursion
+											if(!temp[currentDep.name]){
+												temp[currentDep.name] = currentDep.name;
+												depSteps.push(that.get(currentDep.name, recursive, temp))
+											}
 										}
 										Promise
 											.all(depSteps)

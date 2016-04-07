@@ -1,2 +1,7 @@
 /node_modules/
 .DS_Store
+/Mold/Core/Test/Tester.js
+/Mold/Core/Test/CLIReporter.js
+/Mold/CMD/Test.js
+/Mold/Core/EventStore.js
+/Mold/Core/Event.js

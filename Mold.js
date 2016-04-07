@@ -676,7 +676,7 @@
 							resolve(results);
 							return;
 						}
-						stack[counter]()
+						stack[counter](results)
 							.then(function(result){
 								results.push(result);
 								nextFromStack(++counter);
