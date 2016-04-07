@@ -52,9 +52,8 @@ Seed({
 			},
 			code : function(args){
 				return new Promise(function(resolve, reject){
-					Helper = Helper.getInstance();
-					Helper.silent = args.conf.silent;
-					var loader = Helper.loadingBar("get package info ");
+			
+					var loader = Helper.loadingBar("get package info ", args.conf.silent);
 					var _packageSources = {};
 					var _packageDep = {};
 					var _gitIgnorSources = [];
@@ -110,15 +109,15 @@ Seed({
 										return response.packageInfo.currentPackage.name === entry.name
 									})
 								){
-									loader.stop();
-									Helper.info("Package " + response.packageInfo.currentPackage.name + " is allready installed!").lb();
+									loader.stop('', args.conf.silent);
+									Helper.info("Package " + response.packageInfo.currentPackage.name + " is allready installed!", args.conf.silent).lb(args.conf.silent);
 									resolve(args)
 									return;
 								}
 								
 								//create repositorys
 								for(repoName in response.packageInfo.repositories){
-									loader.text("create repositories")
+									loader.text("create repositories", args.conf.silent)
 									repos.push(Command.createRepo({ '-name' : repoName, '--silent' : true }));
 								}
 
@@ -130,7 +129,7 @@ Seed({
 										response.packageInfo.linkedSources.forEach(function(source){
 
 											if(!_isInstalledPackage(source.packageName)){
-												loader.text("add source " + source.path)
+												loader.text("add source " + source.path, args.conf.silent)
 												if(source.type === 'dir'){
 													_collectSource(source.packageName, source.path, 'dir');
 													//create directory
@@ -172,7 +171,7 @@ Seed({
 
 									installSteps.push(function() {
 										return Promise.waterfall(installNpms).then(function(message){
-											loader.text(message.join(" "));
+											loader.text(message.join(" "), args.conf.silent);
 											//Helper.info(message.join("\n")).lb();
 										})
 									})
@@ -202,7 +201,7 @@ Seed({
 													
 													return function(){
 														if(Mold.Core.Pathes.exists(newSeedPath, 'file')){
-															loader.stop(' ');
+															loader.stop(' ', args.conf.silent);
 															Helper.warn("Conflict detected  " + newSeedPath + " currently exists!").lb();
 															return Command
 																		.merge({ '-l' : newSeedPath, '-r' : seedPathCopy})
@@ -218,7 +217,7 @@ Seed({
 																'--silent' : true
 															})
 															.then(function(seedArgs){
-																loader.text("copy seed " + seedArgs.parameter['-name'].value);
+																loader.text("copy seed " + seedArgs.parameter['-name'].value, args.conf.silent);
 																_collectSource(packageName, seedArgs.parameter['-target'], 'file');
 																_addToGitIgnor('/' + seedArgs.parameter['-target']);
 															})
@@ -237,7 +236,7 @@ Seed({
 								installSteps.push(function(){
 									var packageDependencies = [];
 									response.packageInfo.linkedPackages.forEach(function(currentPackage){
-										loader.text("add dependency " + currentPackage.name)
+										loader.text("add dependency " + currentPackage.name, args.conf.silent)
 										if(currentPackage.dependencies){
 											_packageDep[currentPackage.name] = _packageDep[currentPackage.name] || [];
 											_packageDep[currentPackage.name] = _packageDep[currentPackage.name].concat(currentPackage.dependencies);
@@ -331,7 +330,7 @@ Seed({
 													commandArgs['--without-sources'] = true;
 												}
 
-												loader.text("Install dependent package '" + entry.name + "'")
+												loader.text("Install dependent package '" + entry.name + "'", args.conf.silent)
 												return Command.install(commandArgs)
 											})
 										})
@@ -343,8 +342,8 @@ Seed({
 								Promise
 									.waterfall(installSteps)
 									.then(function(result){
-										loader.stop(Helper.COLOR_GREEN + "Package '" + response.packageInfo.currentPackage.name + "' successfully installed! " + Helper.COLOR_RESET);
-										Helper.lb();
+										loader.stop(Helper.COLOR_GREEN + "Package '" + response.packageInfo.currentPackage.name + "' successfully installed! " + Helper.COLOR_RESET, args.conf.silent);
+										Helper.lb(args.conf.silent);
 										resolve(args);
 									})
 									.catch(reject)

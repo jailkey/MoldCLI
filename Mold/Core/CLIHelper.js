@@ -15,6 +15,7 @@ Seed({
 		var _instances = [];
 		var _reader = null;
 		var readline = require('readline');
+		var _instanceCounter = 0;
 
 		var _initReader = function(onclose, completer){
 			if(_reader){
@@ -35,6 +36,8 @@ Seed({
 				config = config || {};
 				var instance = Object.create(this);
 				instance.silent = config.silent;
+				_instanceCounter++;
+				instance.counter = _instanceCounter;
 				_instances.push(instance);
 				return instance;
 			},
@@ -60,12 +63,12 @@ Seed({
 		 * @description shows an errormessage
 		 * @param  {string} error a string with a message
 		 */
-			error : function(error){
-				this.write(this.COLOR_RED + error + this.COLOR_RESET).lb();
+			error : function(error, silent){
+				this.write(this.COLOR_RED + error + this.COLOR_RESET, silent).lb(silent);
 				return this;
 			},
-			warn : function(warn){
-				this.write(this.COLOR_YELLOW + warn + this.COLOR_RESET);
+			warn : function(warn, silent){
+				this.write(this.COLOR_YELLOW + warn + this.COLOR_RESET, silent).lb(silent);
 				return this;
 			},
 			fail : this.error,
@@ -75,15 +78,15 @@ Seed({
 		 * @param  {string} message [description]
 		 * @return {[type]}         [description]
 		 */
-			write : function(message){
-				if(!this.silent){
+			write : function(message, silent){
+				if(!this.silent && !silent){
 					process.stdout.write(message)
 				}
 				return this;
 			},
 
-			lb : function(){
-				if(!this.silent){
+			lb : function(silent){
+				if(!this.silent && !silent){
 					process.stdout.write('\n')
 				}
 				return this;
@@ -94,15 +97,15 @@ Seed({
 		 * @param  {string} message [description]
 		 * @return {[type]}         [description]
 		 */
-			ok : function(message){
-				if(!this.silent){
+			ok : function(message, silent){
+				if(!this.silent && !silent){
 					process.stdout.write(this.COLOR_GREEN + message + this.COLOR_RESET)
 				}
 				return this;
 			},
 
-			info : function(message){
-				if(!this.silent){
+			info : function(message, silent){
+				if(!this.silent && !silent){
 					process.stdout.write(this.COLOR_CYAN + message + this.COLOR_RESET)
 				}
 				return this;
@@ -316,15 +319,14 @@ Seed({
 				
 			},
 			__loadingBar : null,
-			loadingBar : function(text, time){
-				if(this.silent){
-					this.__loadingBar = {
+			loadingBar : function(text, silent, time){
+				if(this.silent || silent){
+
+					return {
 						stop : function(){},
 						start : function(){},
 						text : function(){}
 					}
-
-					return this.__loadingBar;
 				}
 				var stop = false;
 				var time = time || 100;
@@ -348,8 +350,11 @@ Seed({
 				next(0);
 
 				this.__loadingBar = {
-					stop : function(text){
-						that.allLoader('stop', [' '], this);
+					stop : function(text, silent){
+						if(silent){
+							stop = true;
+							return;
+						}
 						process.stdout.cursorTo(0);
 						if(text){
 							var old = sprite[0] + "   " + _text;
@@ -359,19 +364,26 @@ Seed({
 							}
 							process.stdout.write(text);
 						}else{
-							process.stdout.write(sprite[0] + "   " + _text);
+							process.stdout.write(" ".repeat(sprite[0].length) + " ".repeat( _text.length));
 						}
-						process.stdout.write("\n")
+						process.stdout.cursorTo(0);
+						//process.stdout.write("\n")
 						stop = true;
 					},
-					start : function(text){
+					start : function(text, silent){
+						if(silent){
+							return;
+						}
 						stop = false;
 						if(text){
 							this.text(text);
 						}
 						next(0);
 					},
-					text : function(text){
+					text : function(text, silent){
+						if(silent){
+							return;
+						}
 						var space = "";
 						if(_text.length > text.length){
 							var space = " ".repeat(_text.length);
