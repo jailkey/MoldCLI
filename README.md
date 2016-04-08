@@ -28,7 +28,7 @@ if you want to add a package to your current project use:
 Use ```--help``` to  get info about a command.
 
 ##commands
-Currently implemented (most importend) commands are:
+Currently implemented (most important) commands are:
 
 * **init** - intitalise a new mold app/package creates a mold.json file
 
@@ -56,6 +56,11 @@ Currently implemented (most importend) commands are:
 	
 * **test** - executes a test for a specific seed (if a test is defined)
 	* **-name** - the seed name
+	
+* **update-mold-json** updates the mold.json file
+	* **-property** - the property to update
+	* **-value** - the value
+ 
 
 	
 ##using commands programmatically
