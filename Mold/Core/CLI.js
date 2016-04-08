@@ -174,7 +174,7 @@ Seed({
 			_isLoaded.then(_execCommands).catch(function(e){
 				if(e instanceof Mold.Errors.CommandError){
 					CLIHelper.lb();
-					CLIHelper.warn(e.message).lb();
+					CLIHelper.error(e.message);
 					if(e.command){
 						_getCommandHelp(Command.get(e.command))
 					}else{

@@ -40,7 +40,10 @@ Seed({
 					var property = args.parameter['-property'].value;
 
 					if(typeof value === "string"){
-						value = JSON.parse(value);
+						//if value has brackets try to parse it as json
+						if(~value.indexOf('[') || ~value.indexOf('{')){
+							value = JSON.parse(value);
+						}	
 					}
 			
 					Command.execute('get-mold-json', { '-p' : '' })

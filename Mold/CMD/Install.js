@@ -135,7 +135,8 @@ Seed({
 												}else if(source.type === 'file'){
 													if(Mold.Core.Pathes.exists(source.path, 'file')){
 														sourcePromises.push(function() {
-															Helper.warn("Conflict detected  " + newSeedPath + " currently exists!").lb();
+															loader.stop(' ');
+															Helper.lb().warn("Conflict detected:  " + source.path + " currently exists!");
 															return Command.merge({'-l' : source.path, '-r' : source.filePath}) 
 														});
 													}else{
@@ -202,7 +203,7 @@ Seed({
 													return function(){
 														if(Mold.Core.Pathes.exists(newSeedPath, 'file')){
 															loader.stop(' ');
-															Helper.lb().warn("Conflict detected  " + newSeedPath + " currently exists!");
+															Helper.lb().warn("Conflict detected: " + newSeedPath + " currently exists!");
 															return Command
 																		.merge({ '-l' : newSeedPath, '-r' : seedPathCopy})
 																		.then(function(){

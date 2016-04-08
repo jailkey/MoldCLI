@@ -12,7 +12,7 @@ Seed({
 
 		Command.register({
 			name : "git-ignore",
-			description : "Adds a path to the .gitignor files",
+			description : "Adds/removes a path to/from the .gitignor files",
 			parameter : {
 				'-path' : {
 					description : 'The path you want to add!',
