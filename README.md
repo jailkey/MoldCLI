@@ -130,6 +130,8 @@ Mold.Core.CLIForm - Create easily a cli form to manage user input
 Mold.Core.CLILoadingBar
 
 
+For detailed information see api docs (when they are ready :) )
+
 
 
 	
