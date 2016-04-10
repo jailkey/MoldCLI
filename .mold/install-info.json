@@ -3,19 +3,7 @@
 		"Mold": {
 			"sources": [
 				{
-					"path": "Mold/Core/VM.js",
-					"type": "file"
-				},
-				{
-					"path": "Mold/Core/Sequence.js",
-					"type": "file"
-				},
-				{
-					"path": "Mold/Core/Validation.js",
-					"type": "file"
-				},
-				{
-					"path": "Mold/Core/Version.js",
+					"path": "Mold/Core/NPM.js",
 					"type": "file"
 				},
 				{
@@ -23,7 +11,15 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/NPM.js",
+					"path": "Mold/Core/Validation.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/VM.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Version.js",
 					"type": "file"
 				},
 				{
@@ -31,12 +27,18 @@
 					"type": "file"
 				}
 			],
-			"dependencies": []
+			"dependencies": [
+				{
+					"name": "Mold.Core.Test",
+					"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.Test/master/",
+					"version": "0.0.1"
+				}
+			]
 		},
 		"Mold.Core.Test": {
 			"sources": [
 				{
-					"path": "Mold/Core/Test/Tester.js",
+					"path": "Mold/CMD/Test.js",
 					"type": "file"
 				},
 				{
@@ -44,7 +46,7 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/CMD/Test.js",
+					"path": "Mold/Core/Test/Tester.js",
 					"type": "file"
 				}
 			],
@@ -82,6 +84,38 @@
 					"name": "Mold",
 					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
 					"version": "0.2.3"
+				}
+			]
+		},
+		"Mold.Core.CLI": {
+			"sources": [
+				{
+					"path": "Mold/Core/CLIForm.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/CLI.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/CLILoadingBar.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Logger.js",
+					"type": "file"
+				}
+			],
+			"dependencies": [
+				{
+					"name": "Mold",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
+					"version": "0.2.3"
+				},
+				{
+					"name": "Mold.Core.Test",
+					"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.Test/master/",
+					"version": "0.0.1"
 				}
 			]
 		}

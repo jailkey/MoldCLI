@@ -676,7 +676,7 @@
 							resolve(results);
 							return;
 						}
-						stack[counter](results)
+						stack[counter]()
 							.then(function(result){
 								results.push(result);
 								nextFromStack(++counter);
@@ -1330,8 +1330,8 @@
 					}
 				}
 
-				this.excutedValue = typeHandler.create(this);
-				__Mold.Core.NamespaceManager.addCode(this.name, this.excutedValue);
+				this.executedValue = typeHandler.create(this);
+				__Mold.Core.NamespaceManager.addCode(this.name, this.executedValue);
 			}
 		}
 
@@ -1877,7 +1877,7 @@
 
 			/**
 			 * @method getPathFromName 
-			 * @description translate a seed loading string into a path
+			 * @description translite a seed loading string into a path
 			 * @param  {string} name - the string to convert
 			 * @return {string} returns a seed path
 			 */
@@ -2995,7 +2995,7 @@
 						this._exports = exported;
 					}
 				}
-
+	
 				seed.code.call(seed, module);
 
 				return module.exports;

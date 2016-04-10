@@ -16,29 +16,22 @@ Seed({
 		Version.prototype = {
 			validate : function(version){
 				if(!version){
-					throw new Error("Version number is not defined!")
+					throw new Error("Version is not defined!")
 				}
 				if(typeof version !== "string"){
-					throw new Error("Version number is not a string! ['" + version + "']")
+					throw new Error("Version is not a string! ['" + version + "']")
 				}
 				var parts = version.split(".");
 				if(parts.length !== 3){
-					throw new Error("Version number needs 3 parts! ['" + version + "']")
+					throw new Error("Version needs parts! ['" + version + "']")
 				}
 				for(var i = 0; i < parts.length; i++){
-					var part = Number(parts[i]) 
-					if(isNaN(part) || part === ""){
-						throw new Error("Part " + ( i +1 ) + " of the version number is not a number! ['" + version + "']")
-					}
+					
 				}
 			},
-
 			next : function(current){
-				this.validate(current);
-				var parts = current.split('.');
-				return parts[0] + "." + parts[1] + "." + (Number(parts[2]) + 1);
-			},
 
+			},
 			compare : function(target, source){
 				this.validate(target);
 				this.validate(source);
