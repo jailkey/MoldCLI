@@ -2171,12 +2171,13 @@
 				var configPath = __Mold.Core.Initializer.getParam('config-path') || this.get('config-path', _defaultType);
 				var configName = __Mold.Core.Initializer.getParam('config-name') || this.get('config-name', _defaultType);
 				var onlyOneConfig = __Mold.Core.Initializer.getParam('use-one-config') || false;
+				var stopLoadingMainsSeeds = __Mold.Core.Initializer.getParam('stop-loading-main-seeds') || false;
 
 
 				if(configPath !== "" && !configPath.endsWith("/")){
 					configPath += "/";
 				}
-
+				this.set('stop-loading-main-seeds', stopLoadingMainsSeeds);
 				this.set('config-path', configPath);
 				this.set('config-name', configName)
 				this.set('disable-dependency-errors', __Mold.Core.Initializer.getParam('disable-dependency-errors') || false);
@@ -2266,14 +2267,16 @@
 	}()
 
 	Mold.prototype.Core.Initializer = function(){
-		var _params = ['config-name', 
+		var _params = [
+			'config-name', 
 			'config-path', 
 			'global-config-name', 
 			'global-config-path', 
 			'root-path', 
 			'use-one-config', 
 			'disable-dependency-errors', 
-			'stop-seed-executing'
+			'stop-seed-executing',
+			'stop-loading-main-seeds'
 		];
 
 		var _availableParams = {};
@@ -3249,11 +3252,13 @@
 			var mainSeedPromises = []
 			
 			this.ready.then(function(){
-				var mainSeeds = that.Core.Config.search('mainSeeds');
-				if(mainSeeds && mainSeeds.length){
-					mainSeeds.forEach(function(seedName){
-						mainSeedPromises.push(that.load(seedName));
-					})
+				if(!that.Core.Config.get("stop-loading-main-seeds", "local")){
+					var mainSeeds = that.Core.Config.search('mainSeeds');
+					if(mainSeeds && mainSeeds.length){
+						mainSeeds.forEach(function(seedName){
+							mainSeedPromises.push(that.load(seedName));
+						})
+					}
 				}
 			});
 		

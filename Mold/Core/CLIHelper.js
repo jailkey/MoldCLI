@@ -57,7 +57,8 @@ Seed({
 				args = args || [];
 				_instances.forEach(function(instance){
 					instance[method].apply(this, args)
-				})
+				});
+				this[method].apply(this, args)
 			},
 		/**
 		 * @method showError

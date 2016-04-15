@@ -95,7 +95,8 @@ Seed({
 							var getRepoVM = new VM({
 								configPath : path,
 								disableDependencyErrors : true,
-								stopSeedExecuting : true
+								stopSeedExecuting : true,
+								stopLoadingMainSeeds : true
 							});
 
 
@@ -136,9 +137,9 @@ Seed({
 								});
 							}
 
+
 							waterfall.push(function(){
 								return new Promise(function(resolveDep, rejectDep){
-
 									getRepoVM.Mold.Core.Config.isReady.then(function(){
 										var loadSeeds = [];
 										var responseData = response.parameter.source[0].data;
@@ -157,88 +158,75 @@ Seed({
 												collected.repositories[repoName] =  responseData.repositories[repoName];
 											}
 										}
+
 										if(linkedSeeds){
 											linkedSeeds.forEach(function(name){
-												loadSeeds.push(getRepoVM.Mold.load(name));
+											
+												collected.linkedSeeds[name] = { 
+													path : getRepoVM.Mold.Core.Pathes.getPathFromName(name),
+													packageName : responseData.name,
+													packageVersion : responseData.version,
+													hasLoadingError : false
+												};
+
 											});
 
-											Promise.all(loadSeeds).then(function(result){
-												if(!args.parameter['--no-dependencies']){
-													result.forEach(function(seed){
-														collected.linkedSeeds = _getAllDependencies(getRepoVM, seed, response);
-													})
-												}else{
-													result.forEach(function(seed){
-														collected.linkedSeeds[seed.name] = { 
-															path : seed.path,
-															packageName : responseData.name,
-															packageVersion : responseData.version,
-															hasLoadingError : false
-														};
+										}
+
+
+										if(linkedDependencies.length){
+											var depWaterfall = [];
+											linkedDependencies.forEach(function(currentDep){
+												var packageInfoPath = (Mold.Core.Pathes.isHttp(currentDep.path)) ? currentDep.path : currentPath + currentDep.path;
+												//collect dependencies to avoid recusions
+												if(!~collectedDepedencies.indexOf(packageInfoPath)){
+													collectedDepedencies.push(packageInfoPath);
+													depWaterfall.push(function(){
+														return Command
+																	.execute('get-package-info', { '-p' : packageInfoPath, '-collected-depedencies' : collectedDepedencies})
+																	.then(function(foundInfo){
+																		foundInfo.packageInfo.linkedSeeds = _addCurrentVersion(foundInfo.packageInfo.linkedSeeds, currentDep.currentVersion)
+																		collected = Mold.merge(collected, foundInfo.packageInfo, { concatArrays : true, without : [ 'currentPackage'] });
+																	});
 													})
 												}
+											});
 
 
+											Promise
+												.waterfall(depWaterfall)
+												.then(function(){
+													//filter dependedn seeds
+													var filterdCollection = {
+														currentPackage : collected.currentPackage,
+														linkedSeeds : {},
+														repositories : collected.repositories,
+														linkedPackages : collected.linkedPackages,
+														linkedNpmPackages : collected.linkedNpmPackages,
+														linkedNpmDependencies : collected.linkedNpmDependencies,
+														linkedSources : [],
+													}
 
-												if(linkedDependencies.length){
-													var depWaterfall = [];
-													linkedDependencies.forEach(function(currentDep){
-														var packageInfoPath = (Mold.Core.Pathes.isHttp(currentDep.path)) ? currentDep.path : currentPath + currentDep.path;
-														//collect dependencies to avoid recusions
-														if(!~collectedDepedencies.indexOf(packageInfoPath)){
-															collectedDepedencies.push(packageInfoPath);
-															depWaterfall.push(function(){
-																return Command
-																			.execute('get-package-info', { '-p' : packageInfoPath, '-collected-depedencies' : collectedDepedencies})
-																			.then(function(foundInfo){
-																				foundInfo.packageInfo.linkedSeeds = _addCurrentVersion(foundInfo.packageInfo.linkedSeeds, currentDep.currentVersion)
-																				collected = Mold.merge(collected, foundInfo.packageInfo, { concatArrays : true, without : [ 'currentPackage'] });
-																			});
-															})
+													for(var name in collected.linkedSeeds){
+														if(collected.linkedSeeds[name].packageName === currentPackageName){
+															filterdCollection.linkedSeeds[name] = collected.linkedSeeds[name];
 														}
-													});
+													}
 
+													filterdCollection.linkedSources = collected.linkedSources.filter(function(entry){
+														return (entry.packageName === currentPackageName) ? true : false;
+													})
 
-													Promise
-														.waterfall(depWaterfall)
-														.then(function(){
-															//filter dependedn seeds
-															var filterdCollection = {
-																currentPackage : collected.currentPackage,
-																linkedSeeds : {},
-																repositories : collected.repositories,
-																linkedPackages : collected.linkedPackages,
-																linkedNpmPackages : collected.linkedNpmPackages,
-																linkedNpmDependencies : collected.linkedNpmDependencies,
-																linkedSources : [],
-															}
-
-															for(var name in collected.linkedSeeds){
-																if(collected.linkedSeeds[name].packageName === currentPackageName){
-																	filterdCollection.linkedSeeds[name] = collected.linkedSeeds[name];
-																}
-															}
-
-															filterdCollection.linkedSources = collected.linkedSources.filter(function(entry){
-																return (entry.packageName === currentPackageName) ? true : false;
-															})
-
-															args.packageInfo = filterdCollection;
-															resolveDep(args);
-														})
-														.catch(rejectDep)
-
-												}else{
-													args.packageInfo = collected;
+													args.packageInfo = filterdCollection;
 													resolveDep(args);
-												}
-
-											}).catch(rejectDep)
+												})
+												.catch(rejectDep)
 
 										}else{
-											rejectDep(new Error("No linked Seeds found in " + path.value + "!"))
+											args.packageInfo = collected;
+											resolveDep(args);
 										}
-									
+										
 									})
 									.catch(rejectDep);
 								})

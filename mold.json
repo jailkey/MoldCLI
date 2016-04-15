@@ -8,18 +8,42 @@
 		"Mold.Core.CLI"
 	],
 	"seeds": [
-		"Mold.Core.Command"
+		"Mold/CMD/CopySeed.js",
+		"Mold/CMD/CopySource.js",
+		"Mold/CMD/CreateDependecy.js",
+		"Mold/CMD/CreatePath.js",
+		"Mold/CMD/CreateRepo.js",
+		"Mold/CMD/FindProjectSeeds.js",
+		"Mold/CMD/GetMoldJson.js",
+		"Mold/CMD/GetPackageInfo.js",
+		"Mold/CMD/GitIgnore.js",
+		"Mold/CMD/Init.js",
+		"Mold/CMD/Install.js",
+		"Mold/CMD/InstallNpmPackage.js",
+		"Mold/CMD/Merge.js",
+		"Mold/CMD/ScanRepositories.js",
+		"Mold/CMD/Uninstall.js",
+		"Mold/CMD/Update.js",
+		"Mold/CMD/UpdateMoldJson.js",
+		"Mold/CMD/Version.js",
+		"Mold/Core/CLI.js",
+		"Mold/Core/CLIForm.js",
+		"Mold/Core/CLIHelper.js",
+		"Mold/Core/CLILoadingBar.js",
+		"Mold/Core/Command.js",
+		"Mold/Core/InstallInfo.js",
+		"Mold/Core/Logger.js",
+		"Mold/Core/NPM.js",
+		"Mold/Core/Sequence.js",
+		"Mold/Core/VM.js",
+		"Mold/Core/Validation.js",
+		"Mold/Core/Version.js"
 	],
 	"dependencies": [
 		{
 			"name": "Mold",
 			"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
 			"version": "0.2.3"
-		},
-		{
-			"name": "Mold.Core.Test",
-			"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.Test/master/",
-			"version": "0.0.1"
 		}
 	]
 }
