@@ -242,6 +242,7 @@ Seed({
 									setPackageInfos.push(function(){
 										var currentName = currentPackageName;
 										return function() {
+											console.log("SET", collectedPackageInfos)
 											return InstallInfo.set(currentName, collectedPackageInfos[currentName]);
 										}
 									}());

@@ -12,6 +12,7 @@ Seed({
 
 		var MoldVM = function(conf){
 			conf = conf || {};
+
 			this.sandbox = {
 				global : { 
 					global : {},
@@ -39,9 +40,9 @@ Seed({
 			this.moldPath = conf.moldPath || 'Mold.js',
 			this.confPath = conf.configPath || '',
 			this.confName = conf.configName || 'mold.json'
-			this.disableDependencyErrors = conf.disableDependencyErrors || false;
-			this.stopSeedExecuting = conf.stopSeedExecuting || false;
-			this.stopLoadingMainSeeds = conf.stopLoadingMainSeeds || false;
+			this.disableDependencyErrors = conf.disableDependencyErrors || false
+			this.stopSeedExecuting = conf.stopSeedExecuting || false
+			this.stopLoadingMainSeeds = conf.stopLoadingMainSeeds || false
 
 			this.sandbox.process.argv = [
 				'config-path',  this.confPath,

@@ -1899,6 +1899,16 @@
 				return _pathHandler[type](name, ignorExistingCheck);
 			},
 
+			getNameFromPath : function(path){
+				var type = "mold-backwards";
+
+				if(!_pathHandler[type]){
+					throw new Error("Path type '" + type + "' is not supported! [Mold.Core.Pathes]" + __Mold.getInstanceDescription());
+				}
+
+				return _pathHandler[type](path);
+			},
+
 			/**
 			 * @method isMoldPath 
 			 * @description checks if a path is a Mold seed-path or not
@@ -3075,6 +3085,37 @@
 			return createPath('local');
 			
 		});
+
+		this.Core.Pathes.on('mold-backwards', function(path){
+			var createName = function(confType){
+				path = path.replace(".js", "");
+				var pathParts = path.split("/");
+				var repositories = that.Core.Config.get("repositories", confType);
+				var packagePath = that.Core.Config.get('config-path', confType);
+				var rootPath = __Mold.Core.Initializer.getParam('root-path') || '';
+				var name = "";
+				var checkPath = "";
+				var matchedRepo = null;
+
+				for(var i = 0; i < pathParts.length; i++){
+					checkPath += pathParts[i];
+					var selected
+					for(var repoName in repositories){
+						if(repositories[repoName].startsWith(checkPath)){
+							matchedRepo = {
+								name : repoName,
+								path : checkPath
+							}
+						}
+					}
+					checkPath += "/";
+				}
+				var output = matchedRepo.name + path.substring(matchedRepo.path.length, path.length).split("/").join(".");
+				return output;
+			}
+
+			return createName('local');
+		})
 
 		//add some default preprocessors
 		this.Core.Preprocessor
