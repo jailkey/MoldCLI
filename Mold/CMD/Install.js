@@ -71,13 +71,13 @@ Seed({
 							_gitIgnorSources.push(path)
 						}
 					}
-
+					/*
 					var _isInstalledPackage = function(name){
 						var installedDep = Mold.Core.Config.get('dependencies', 'local');
 						return !!installedDep.find(function(current){
 							return (current.name === name) ? true : false;
 						})
-					}
+					}*/
 
 					Command.getMoldJson({'-p' : ''}).then(function(moldJson){
 						if(!moldJson.parameter.source){
@@ -86,6 +86,12 @@ Seed({
 
 						var moldJsonFile = moldJson.parameter.source[0].data;
 						var currentAppName = moldJsonFile.name;
+
+						var _isInstalledPackage = function(name){
+							return !!moldJsonFile.dependencies.find(function(current){
+								return (current.name === name) ? true : false;
+							})
+						}
 
 						Command.getPackageInfo({ '-p' : args.parameter['-path']})
 							.then(function(response){
@@ -112,213 +118,221 @@ Seed({
 									resolve(args)
 									return;
 								}
-								
-								//create repositorys
-								for(repoName in response.packageInfo.repositories){
-									loader.text("create repositories", args.conf.silent)
-									repos.push(Command.createRepo({ '-name' : repoName, '--silent' : true }));
-								}
 
-								
-								//install other sources
-								if(!args.parameter['--without-sources']){
-									var sourcePromises = [];
-									installSteps.push(function(){
-										response.packageInfo.linkedSources.forEach(function(source){
+								InstallInfo.getFile().then(function(infoData){
+									//if package is installed skip it
+									if(infoData.packages[response.packageInfo.currentPackage.name]){
+										resolve(args);
+										return; 
+									}
+									loader.text("install package " + response.packageInfo.currentPackage.name, args.conf.silent)
 
-											if(!_isInstalledPackage(source.packageName)){
-												loader.text("add source " + source.path, args.conf.silent)
-												if(source.type === 'dir'){
-													_collectSource(source.packageName, source.path, 'dir');
-													//create directory
-													sourcePromises.push(function() { return Command.createPath({ '-path' : source.path, '--silent' : true }) })
-												}else if(source.type === 'file'){
-													if(Mold.Core.Pathes.exists(source.path, 'file')){
-														sourcePromises.push(function() {
-															loader.stop(' ');
-															Helper.lb().warn("Conflict detected:  " + source.path + " currently exists!");
-															return Command.merge({'-l' : source.path, '-r' : source.filePath}) 
-														});
-													}else{
-														var file = new File(source.filePath);
-														_collectSource(source.packageName, source.path, 'file')
-														_addToGitIgnor(source.path);
-														sourcePromises.push(function(){ return file.copy(source.path) })
-													}
-												}
-											}
-												
-										});
-										return Promise.waterfall(sourcePromises)
-									})
-								
-								}
-
-								//install linked npm packages
-								if(!args.parameter['--without-npm']){
-									var installNpms = [];
-									for(var npmName in response.packageInfo.linkedNpmDependencies){
-										
-										installNpms.push(function(){
-											var name = npmName;
-											var version = response.packageInfo.linkedNpmDependencies[npmName];
-											return function(){
-												return NPM.install(name, version, false, true);
-											}
-										}()) 
+									//create repositorys
+									for(repoName in response.packageInfo.repositories){
+										loader.text("create repositories", args.conf.silent)
+										repos.push(Command.createRepo({ '-name' : repoName, '--silent' : true }));
 									}
 
-									installSteps.push(function() {
-										return Promise.waterfall(installNpms).then(function(message){
-											loader.text(message.join(" "), args.conf.silent);
-											//Helper.info(message.join("\n")).lb();
-										})
-									})
-								}
-								
-								//install repositorys
-								installSteps.push(function() {
-									return repoPromis.all(repos)
-								})
-
-								
-
-								//copy seeds
-								installSteps.push(function(){
-									var seeds = [];
-									var outputPromise = null;
-									for(var seedName in response.packageInfo.linkedSeeds){
-										var seedPath = response.packageInfo.linkedSeeds[seedName].path;
-										if(seedPath){
-											if(!_isInstalledPackage(response.packageInfo.linkedSeeds[seedName].packageName)){
-												
-												//copy seeds
-												seeds.push(function(){
-													//copy needed from the loop
-													var seedNameCopy = seedName;
-													var packageName = response.packageInfo.linkedSeeds[seedName].packageName;
-													var newSeedPath = Mold.Core.Pathes.getPathFromName(seedNameCopy, true);
-													var seedPathCopy = seedPath;
-													
-													return function(){
-														if(Mold.Core.Pathes.exists(newSeedPath, 'file')){
-															loader.stop(' ');
-															Helper.lb().warn("Conflict detected: " + newSeedPath + " currently exists!");
-															return Command
-																		.merge({ '-l' : newSeedPath, '-r' : seedPathCopy})
-																		.then(function(){
-																			_collectSource(packageName, newSeedPath, 'file');
-																			Helper.lb();
-																			loader.start("conflict solved!")
-																		})
-
+									
+									//install other sources
+									if(!args.parameter['--without-sources']){
+										var sourcePromises = [];
+										installSteps.push(function(){
+											response.packageInfo.linkedSources.forEach(function(source){
+												if(!_isInstalledPackage(source.packageName)){
+													loader.text("add source " + source.path, args.conf.silent)
+													if(source.type === 'dir'){
+														_collectSource(source.packageName, source.path, 'dir');
+														//create directory
+														sourcePromises.push(function() { return Command.createPath({ '-path' : source.path, '--silent' : true }) })
+													}else if(source.type === 'file'){
+														if(Mold.Core.Pathes.exists(source.path, 'file')){
+															sourcePromises.push(function() {
+																loader.stop(' ');
+																Helper.lb().warn("Conflict detected:  " + source.path + " currently exists!");
+																return Command.merge({'-l' : source.path, '-r' : source.filePath}) 
+															});
 														}else{
-															return Command.copySeed({ 
-																'-name' : seedNameCopy,
-																'-path' : seedPathCopy,
-																'--silent' : true
-															})
-															.then(function(seedArgs){
-																loader.text("copy seed " + seedArgs.parameter['-name'].value, args.conf.silent);
-																_collectSource(packageName, seedArgs.parameter['-target'], 'file');
-																_addToGitIgnor('/' + seedArgs.parameter['-target']);
-															})
+															var file = new File(source.filePath);
+															_collectSource(source.packageName, source.path, 'file')
+															_addToGitIgnor(source.path);
+															sourcePromises.push(function(){ return file.copy(source.path) })
 														}
 													}
-												}());
-											}
-											
-										}
+												}
+													
+											});
+											return Promise.waterfall(sourcePromises)
+										})
+									
 									}
 
-									return Promise.waterfall(seeds);
-								});
-
-								//add dependencies
-								installSteps.push(function(){
-									var packageDependencies = [];
-									response.packageInfo.linkedPackages.forEach(function(currentPackage){
-										loader.text("add dependency " + currentPackage.name, args.conf.silent)
-										if(currentPackage.dependencies){
-											_packageDep[currentPackage.name] = _packageDep[currentPackage.name] || [];
-											_packageDep[currentPackage.name] = _packageDep[currentPackage.name].concat(currentPackage.dependencies);
+									//install linked npm packages
+									if(!args.parameter['--without-npm']){
+										var installNpms = [];
+										for(var npmName in response.packageInfo.linkedNpmDependencies){
+											
+											installNpms.push(function(){
+												var name = npmName;
+												var version = response.packageInfo.linkedNpmDependencies[npmName];
+												return function(){
+													return NPM.install(name, version, false, true);
+												}
+											}()) 
 										}
+
+										installSteps.push(function() {
+											return Promise.waterfall(installNpms).then(function(message){
+												loader.text(message.join(" "), args.conf.silent);
+												//Helper.info(message.join("\n")).lb();
+											})
+										})
+									}
+									
+									//install repositorys
+									installSteps.push(function() {
+										return repoPromis.all(repos)
+									})
+
+									
+
+									//copy seeds
+									installSteps.push(function(){
+										var seeds = [];
+										var outputPromise = null;
+										for(var seedName in response.packageInfo.linkedSeeds){
+											var seedPath = response.packageInfo.linkedSeeds[seedName].path;
+											if(seedPath){
+												if(!_isInstalledPackage(response.packageInfo.linkedSeeds[seedName].packageName)){
+													
+													//copy seeds
+													seeds.push(function(){
+														//copy needed from the loop
+														var seedNameCopy = seedName;
+														var packageName = response.packageInfo.linkedSeeds[seedName].packageName;
+														var newSeedPath = Mold.Core.Pathes.getPathFromName(seedNameCopy, true);
+														var seedPathCopy = seedPath;
+														
+														return function(){
+															if(Mold.Core.Pathes.exists(newSeedPath, 'file')){
+																loader.stop(' ');
+																Helper.lb().warn("Conflict detected: " + newSeedPath + "[" + packageName + "] currently exists!");
+																return Command
+																			.merge({ '-l' : newSeedPath, '-r' : seedPathCopy})
+																			.then(function(){
+																				_collectSource(packageName, newSeedPath, 'file');
+																				Helper.lb();
+																				loader.start("conflict solved!")
+																			})
+
+															}else{
+																return Command.copySeed({ 
+																	'-name' : seedNameCopy,
+																	'-path' : seedPathCopy,
+																	'--silent' : true
+																})
+																.then(function(seedArgs){
+																	loader.text("copy seed " + seedArgs.parameter['-name'].value, args.conf.silent);
+																	_collectSource(packageName, seedArgs.parameter['-target'], 'file');
+																	_addToGitIgnor('/' + seedArgs.parameter['-target']);
+																})
+															}
+														}
+													}());
+												}
+												
+											}
+										}
+
+										return Promise.waterfall(seeds);
 									});
 
-									if(args.parameter['--without-adding-dependencies']){
-										return new Promise().resolve()
-									}else{
-										//add only the curent dependency
-										return Command.createDependency({ 
-											'-name' : response.packageInfo.currentPackage.name,
-											'-path' : response.packageInfo.currentPackage.path,
-											'-version' : response.packageInfo.currentPackage.version,
-											'--silent' : true
-										})
-									}
-								})
-
-
-								//add to git ignore
-								installSteps.push(function(){
-									var gitIgnorAdds = [];
-									if(!args.parameter['--without-git-ignore']){
-										_gitIgnorSources.forEach(function(path){
-											gitIgnorAdds.push(function(){
-												return Command.gitIgnore({ 
-													'-path' : path,
-													'--add' : true,
-													'--silent' : true
-												});
-											});
-										})
-									}
-
-									return Promise.waterfall(gitIgnorAdds);
-								})
-								
-								//create mold installation dir
-								installSteps.push(function(){
-									return Command.createPath({ '-path' : '.mold', '--dir' : true ,'--silent' : true })
-								});
-
-								//add source to temp info files
-								installSteps.push(function(){
-									var setInfos = [];
-									for(var packageName in _packageSources){
-										setInfos.push(function(){
-											var pckName = packageName;
-											var pSource =  _packageSources[packageName];
-											return function() { return InstallInfo.set(pckName, { 
-												sources : pSource,
-												dependencies : _packageDep[pckName] || []
-											}) }
-										}());
-									}
-									return Promise.waterfall(setInfos)
-								})
-
-								//install linked depnedencies
-								if(!args.parameter['--without-sub-packages']){
+									//add dependencies
 									installSteps.push(function(){
-										//filter double linked packages and self before
-										return new Promise(function(resolveSub, rejectSub){
-											var collectedPackes = {}
-											collectedPackes[response.packageInfo.currentPackage.name] = true;
-											response.packageInfo.linkedPackages = response.packageInfo.linkedPackages.filter(function(entry){
-												if(!collectedPackes[entry.name]){
-													collectedPackes[entry.name] = true;
-													return true;
-												}
-												return false;
+										var packageDependencies = [];
+										response.packageInfo.linkedPackages.forEach(function(currentPackage){
+											loader.text("add dependency " + currentPackage.name, args.conf.silent)
+											if(currentPackage.dependencies){
+												_packageDep[currentPackage.name] = _packageDep[currentPackage.name] || [];
+												_packageDep[currentPackage.name] = _packageDep[currentPackage.name].concat(currentPackage.dependencies);
+											}
+										});
+
+										if(args.parameter['--without-adding-dependencies']){
+											return new Promise().resolve()
+										}else{
+											//add only the curent dependency
+											return Command.createDependency({ 
+												'-name' : response.packageInfo.currentPackage.name,
+												'-path' : response.packageInfo.currentPackage.path,
+												'-version' : response.packageInfo.currentPackage.version,
+												'--silent' : true
 											})
-											var installLinkedPackages = [];
-											//get installation info to match if a package is installed
-											
-											InstallInfo.getFile().then(function(infoData){
+										}
+									})
+
+
+									//add to git ignore
+									installSteps.push(function(){
+										var gitIgnorAdds = [];
+										if(!args.parameter['--without-git-ignore']){
+											_gitIgnorSources.forEach(function(path){
+												gitIgnorAdds.push(function(){
+													return Command.gitIgnore({ 
+														'-path' : path,
+														'--add' : true,
+														'--silent' : true
+													});
+												});
+											})
+										}
+
+										return Promise.waterfall(gitIgnorAdds);
+									})
+									
+									//create mold installation dir
+									installSteps.push(function(){
+										return Command.createPath({ '-path' : '.mold', '--dir' : true ,'--silent' : true })
+									});
+
+									//add source to temp info files
+									installSteps.push(function(){
+										var setInfos = [];
+										for(var packageName in _packageSources){
+											setInfos.push(function(){
+												var pckName = packageName;
+												var pSource =  _packageSources[packageName];
+												loader.text("add " + packageName + " to install info ")
+												return function() { return InstallInfo.set(pckName, { 
+													sources : pSource,
+													dependencies : _packageDep[pckName] || []
+												}) }
+											}());
+										}
+										return Promise.waterfall(setInfos)
+									})
+
+									//install linked depnedencies
+									if(!args.parameter['--without-sub-packages']){
+										installSteps.push(function(){
+											//filter double linked packages and self before
+											return new Promise(function(resolveSub, rejectSub){
+												var collectedPackes = {}
+												collectedPackes[response.packageInfo.currentPackage.name] = true;
+												response.packageInfo.linkedPackages = response.packageInfo.linkedPackages.filter(function(entry){
+													if(!collectedPackes[entry.name]){
+														collectedPackes[entry.name] = true;
+														return true;
+													}
+													return false;
+												})
+												var installLinkedPackages = [];
+												//get installation info to match if a package is installed
+												
+												//InstallInfo.getFile().then(function(infoData){
 												response.packageInfo.linkedPackages.forEach(function(entry){
 													//check if the package is currently installed
-													var info = InstallInfo.get(entry.name);
+													//var info = InstallInfo.get(entry.name);
 													if(infoData.packages[entry.name]){
 														loader.text("skip " + entry.name + ", package is currently installed.")
 													}else{
@@ -346,21 +360,21 @@ Seed({
 													}
 												})
 												return Promise.waterfall(installLinkedPackages).then(resolveSub).catch(rejectSub);
-											}).catch(rejectSub);
+											
+											})
+										});
+									}
+
+									//execute all steps
+									Promise
+										.waterfall(installSteps)
+										.then(function(result){
+											loader.stop(Helper.COLOR_GREEN + "Package '" + response.packageInfo.currentPackage.name + "' successfully installed! " + Helper.COLOR_RESET, args.conf.silent);
+											Helper.lb(args.conf.silent);
+											resolve(args);
 										})
-									});
-								}
-
-								//execute all steps
-								Promise
-									.waterfall(installSteps)
-									.then(function(result){
-										loader.stop(Helper.COLOR_GREEN + "Package '" + response.packageInfo.currentPackage.name + "' successfully installed! " + Helper.COLOR_RESET, args.conf.silent);
-										Helper.lb(args.conf.silent);
-										resolve(args);
-									})
-									.catch(reject)
-
+										.catch(reject)
+								}).catch(reject)
 								
 							})
 							.catch(reject);					

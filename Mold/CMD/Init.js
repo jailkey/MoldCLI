@@ -112,7 +112,7 @@ Seed({
 							if(!Mold.Core.Pathes.exists('.gitignore', 'file')){
 								pathesToCreate.push(function(){
 									return Command
-										.createPath({ '-path' : '.gitignore', '-content' : '', '--silent' : true})
+										.createPath({ '-path' : '.gitignore', '-content' : '.mold \n', '--silent' : true})
 										.then(function(){
 											Helper.ok(".gitignore successfully created!").lb();
 										})
