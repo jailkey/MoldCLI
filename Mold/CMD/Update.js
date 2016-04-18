@@ -62,9 +62,11 @@ Seed({
 					var collectedSources = {};
 					Command.getMoldJson({ '-p' : '' }).then(function(moldJson){
 						moldJson =  moldJson.parameter.source[0].data;
+
 						if(!moldJson){
 							reject(new Error("Config is not defined!"))
 						}
+						var currentName = moldJson.name;
 
 						if(moldJson.dependencies.length){
 							var infoPromises = [];
@@ -129,22 +131,25 @@ Seed({
 								for(var seedName in mergedDeps.linkedSeeds){
 									var seedPath =  mergedDeps.linkedSeeds[seedName].path;
 									if(seedPath){
-										seeds.push(function(){
-											var packageName = mergedDeps.linkedSeeds[seedName].packageName;
-											return Command
-													.copySeed({ '-name' : seedName, '-path' : seedPath, '--o' : true })
-													.then(function(seedArgs){
-														collectedPackageInfos[packageName] = collectedPackageInfos[packageName] || {
-															sources : [],
-															dependencies : []
-														}
-														collectedPackageInfos[packageName].sources.push({
-															path : seedArgs.parameter['-target'],
-															type : 'file'
+										if(mergedDeps.linkedSeeds[seedName].packageName !== currentName){
+											seeds.push(function(){
+												var packageName = mergedDeps.linkedSeeds[seedName].packageName;
+										
+												return Command
+														.copySeed({ '-name' : seedName, '-path' : seedPath, '--o' : true })
+														.then(function(seedArgs){
+															collectedPackageInfos[packageName] = collectedPackageInfos[packageName] || {
+																sources : [],
+																dependencies : []
+															}
+															collectedPackageInfos[packageName].sources.push({
+																path : seedArgs.parameter['-target'],
+																type : 'file'
+															})
 														})
-													})
 
-										}());
+											}());
+										}
 									}
 								}
 
@@ -159,34 +164,37 @@ Seed({
 								infos.forEach(function(info){
 									//collect lkinked package depednecies
 									info.linkedPackages.forEach(function(selectedPackage){
-
-										collectedPackageInfos[selectedPackage.name] = collectedPackageInfos[selectedPackage.name] || {
-											sources : [],
-											dependencies : []
+										if(selectedPackage.name !== currentName){
+											collectedPackageInfos[selectedPackage.name] = collectedPackageInfos[selectedPackage.name] || {
+												sources : [],
+												dependencies : []
+											}
+											collectedPackageInfos[selectedPackage.name].dependencies = selectedPackage.dependencies;
 										}
-										collectedPackageInfos[selectedPackage.name].dependencies = selectedPackage.dependencies;
 
 									});
 									if(info.linkedSources && info.linkedSources.length){
 										info.linkedSources.forEach(function(source){
-											if(source.type === 'file'){
-												if(!copiedSources[source.filePath]){
-													sourcePromises.push(Command.copySource({ '-source' : source.filePath, '-target' : source.path}));
-													copiedSources[source.filePath] = true;
+											if(source.packageName !== currentName){
+												if(source.type === 'file'){
+													if(!copiedSources[source.filePath]){
+														sourcePromises.push(Command.copySource({ '-source' : source.filePath, '-target' : source.path}));
+														copiedSources[source.filePath] = true;
 
+													}
+												}else{
+													if(!copiedSources[source.path]){
+														Command.createPath({ '-path' : source.path})
+														copiedSources[source.path] = true;
+													}
 												}
-											}else{
-												if(!copiedSources[source.path]){
-													Command.createPath({ '-path' : source.path})
-													copiedSources[source.path] = true;
+												if(!collectedSources[source.path]){
+													collectedPackageInfos[source.packageName].sources.push({
+														path : source.path,
+														type : source.type
+													})
+													collectedSources[source.path] = true;
 												}
-											}
-											if(!collectedSources[source.path]){
-												collectedPackageInfos[source.packageName].sources.push({
-													path : source.path,
-													type : source.type
-												})
-												collectedSources[source.path] = true;
 											}
 										})
 									}
@@ -201,7 +209,7 @@ Seed({
 									}
 								})
 							})
-									
+								
 							updateSteps.push(function(){
 								return new Promise(function(resolveJsonUpdate, rejectJsonUpdate){
 									var updateMoldJson = false;
@@ -242,7 +250,6 @@ Seed({
 									setPackageInfos.push(function(){
 										var currentName = currentPackageName;
 										return function() {
-											console.log("SET", collectedPackageInfos)
 											return InstallInfo.set(currentName, collectedPackageInfos[currentName]);
 										}
 									}());
