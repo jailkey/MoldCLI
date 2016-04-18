@@ -88,9 +88,9 @@ Seed({
 								var collectedSubDependencies = {};
 								var subInfosPromises = [];
 								infos.forEach(function(dep){
-									//console.log("DEP", dep.linkedPackages)
+					
 									dep.linkedPackages.forEach(function(linkedPackage){
-										if(!collectedDependencies[linkedPackage.name]){
+										if(!collectedDependencies[linkedPackage.name] && linkedPackage.name !== moldJson.name){
 											collectedSubDependencies[linkedPackage.name] = linkedPackage;
 										}
 									})
