@@ -82,6 +82,43 @@
 					"version": "0.2.3"
 				}
 			]
+		},
+		"Mold.Core.CLIHelper": {
+			"sources": [
+				{
+					"path": "Mold/Core/CLIForm.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/CLIHelper.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/CLILoadingBar.js",
+					"type": "file"
+				}
+			],
+			"dependencies": []
+		},
+		"Mold.Core.Logger": {
+			"sources": [
+				{
+					"path": "Mold/Core/Logger.js",
+					"type": "file"
+				}
+			],
+			"dependencies": [
+				{
+					"name": "Mold.Core.Test",
+					"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.Test/master/",
+					"version": "0.0.1"
+				},
+				{
+					"name": "Mold",
+					"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
+					"version": "0.2.3"
+				}
+			]
 		}
 	}
 }

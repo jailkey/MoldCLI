@@ -27,18 +27,24 @@
 		"Mold.CMD.UpdateMoldJson",
 		"Mold.CMD.Version",
 		"Mold.Core.CLI",
-		"Mold.Core.CLIForm",
-		"Mold.Core.CLIHelper",
-		"Mold.Core.CLILoadingBar",
 		"Mold.Core.Command",
-		"Mold.Core.InstallInfo",
-		"Mold.Core.Logger"
+		"Mold.Core.InstallInfo"
 	],
 	"dependencies": [
 		{
 			"name": "Mold",
 			"path": "https://raw.githubusercontent.com/jailkey/MoldJS/master/",
 			"version": "0.2.3"
+		},
+		{
+			"name": "Mold.Core.CLIHelper",
+			"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.CLIHelper/master/",
+			"version": "0.0.1"
+		},
+		{
+			"name": "Mold.Core.Logger",
+			"path": "https://raw.githubusercontent.com/jailkey/Mold.Core.Logger/master/",
+			"version": "0.0.1"
 		}
 	]
 }
