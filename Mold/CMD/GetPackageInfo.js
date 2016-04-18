@@ -31,7 +31,6 @@ Seed({
 				'-collected-depedencies' :{
 					'description' : 'A list of dependencies which will not install, used to avoid endless recusion'
 				}
-
 			},
 			code : function(args){
 				var currentPath = args.parameter['-path'].value;
