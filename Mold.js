@@ -3368,7 +3368,6 @@
 			this.ready.then(function(){
 				if(!that.Core.Config.get("stop-loading-main-seeds", "local")){
 					var mainSeeds = that.Core.Config.getMerged('mainSeeds');
-					console.log("mainSeeds", meinSeeds)
 					if(mainSeeds && mainSeeds.length){
 						mainSeeds.forEach(function(seedName){
 							mainSeedPromises.push(that.load(seedName));

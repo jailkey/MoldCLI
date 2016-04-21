@@ -3,15 +3,11 @@
 		"Mold": {
 			"sources": [
 				{
-					"path": "Mold/Core/Sequence.js",
-					"type": "file"
-				},
-				{
-					"path": "Mold/Core/NPM.js",
-					"type": "file"
-				},
-				{
 					"path": "Mold/Core/Version.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/VM.js",
 					"type": "file"
 				},
 				{
@@ -19,7 +15,11 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/VM.js",
+					"path": "Mold/Core/NPM.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Core/Sequence.js",
 					"type": "file"
 				},
 				{
@@ -38,15 +38,15 @@
 		"Mold.Core.Test": {
 			"sources": [
 				{
-					"path": "Mold/Test/Core/Tester.js",
-					"type": "file"
-				},
-				{
 					"path": "Mold/CMD/Test.js",
 					"type": "file"
 				},
 				{
 					"path": "Mold/Core/Test/ConsoleReporter.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Test/Core/Tester.js",
 					"type": "file"
 				},
 				{
@@ -84,15 +84,15 @@
 		"Mold.Core.Event": {
 			"sources": [
 				{
+					"path": "Mold/Core/Event.js",
+					"type": "file"
+				},
+				{
 					"path": "Mold/Test/Core/Event.js",
 					"type": "file"
 				},
 				{
 					"path": "Mold/Core/EventStore.js",
-					"type": "file"
-				},
-				{
-					"path": "Mold/Core/Event.js",
 					"type": "file"
 				}
 			],
