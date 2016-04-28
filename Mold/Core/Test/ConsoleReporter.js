@@ -4,7 +4,6 @@ Seed({
 	},
 	function(){
 
-
 		var _showStack = function(stack){
 			
 			var parts = stack.split('\n');
@@ -22,7 +21,7 @@ Seed({
 				}else{
 					output += part + "\n";
 				}
-			});
+			};
 
 			if(!contentParts.length){
 				output = stack;

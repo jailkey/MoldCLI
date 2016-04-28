@@ -3,11 +3,7 @@
 		"Mold": {
 			"sources": [
 				{
-					"path": "Mold/Core/Version.js",
-					"type": "file"
-				},
-				{
-					"path": "Mold/Core/VM.js",
+					"path": "Mold/Core/Sequence.js",
 					"type": "file"
 				},
 				{
@@ -19,11 +15,11 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/Sequence.js",
+					"path": "Mold/Core/Version.js",
 					"type": "file"
 				},
 				{
-					"path": "Mold.js",
+					"path": "Mold/Core/VM.js",
 					"type": "file"
 				}
 			],
@@ -46,15 +42,23 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/Test/Core/Tester.js",
-					"type": "file"
-				},
-				{
 					"path": "Mold/Core/Test/CLIReporter.js",
 					"type": "file"
 				},
 				{
+					"path": "Mold/Core/Test/Integrate.js",
+					"type": "file"
+				},
+				{
+					"path": "Mold/Test/Core/Tester.js",
+					"type": "file"
+				},
+				{
 					"path": "Mold/Core/Test/Tester.js",
+					"type": "file"
+				},
+				{
+					"path": "test.html",
 					"type": "file"
 				}
 			],
@@ -84,11 +88,11 @@
 		"Mold.Core.Event": {
 			"sources": [
 				{
-					"path": "Mold/Core/Event.js",
+					"path": "Mold/Test/Core/Event.js",
 					"type": "file"
 				},
 				{
-					"path": "Mold/Test/Core/Event.js",
+					"path": "Mold/Core/Event.js",
 					"type": "file"
 				},
 				{
@@ -111,11 +115,11 @@
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/CLIHelper.js",
+					"path": "Mold/Core/CLILoadingBar.js",
 					"type": "file"
 				},
 				{
-					"path": "Mold/Core/CLILoadingBar.js",
+					"path": "Mold/Core/CLIHelper.js",
 					"type": "file"
 				}
 			],
